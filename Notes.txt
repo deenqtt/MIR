@@ -1,0 +1,48 @@
+--Create Backend and Configuration--
+
+dotnet new webapi -n MyWebApi
+cd MyWebApi
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.AspNetCore.Mvc
+dotnet add package Microsoft.Extensions.Configuration.UserSecrets
+dotnet add package System.Text.Json
+dotnet add package System.Globalization
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet build
+dotnet run
+
+API localhost port in File : ./properties/launchSettings.json/ (Application Url : localhost:5258)
+
+For creating the endpoint backend use method (Minimal API Dotnet)
+
+For creating new table you should add in DB Set and migrations the new table use command (dotnet ef migrations add "and messege") example : 'dotnet ef migrations add add_table_user'
+For Running the backend use (dotnet run)
+
+Notes : for run backend more simple use command propmt and for frontend in the terminal VS code
+
+
+--Created Frontend and configuration--
+
+yarn create vite my-vue-app --template vue
+yarn install
+yarn add vue-router@4
+create file router Etc (For Routes Page)
+yarn add axios (For API)
+yarn add bootstraps/tailwind or another (For Styling)
+
+yarn add tailwindcss postcss autoprefixer
+yarn add bootstrap
+
+
+For create Call Api create the Frontend configuration use (Script Setup composision api) : more simple
+
+For run Frontend use (yarn dev)
+
+why yarn? more faster between npm
+
+
+--Prompt Chat GPT--
+
+Please create backend Table for user use dotnet and please create the endpoint for method Get all data, get data by id, create data, update data, delete data use minimal api dotnet.
+from the endpoint above, please create the frontend method get all data, create data etc use script setup composision api vue.js 
