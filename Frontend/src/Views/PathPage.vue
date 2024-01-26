@@ -37,15 +37,112 @@
               <th scope="col">Action</th>
             </tr>
           </thead>
+          <tbody v-if="paths.length > 0">
+            <tr v-for="path in paths" :key="path.id">
+              <td>{{ path.id }}</td>
+              <td>{{ path.name }}</td>
+              <td>{{ path.start }}</td>
+              <td>{{ path.goal }}</td>
+              <td>{{ path.distance }}</td>
+              <td colspan="">
+                <div class="d-flex">
+                  <button
+                    id="detail"
+                    class="material-symbols-outlined"
+                    @click="detailPath(path)"
+                  >
+                    visibility
+                  </button>
+                  <button
+                    id="edit"
+                    class="material-symbols-outlined"
+                    @click="editPath(path)"
+                  >
+                    edit
+                  </button>
+
+                  <br />
+                  <button
+                    id="delete"
+                    class="material-symbols-outlined"
+                    @click="deletePath(path)"
+                  >
+                    delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import axios from "axios";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router"; // Import useRouter
+
+const paths = ref([]);
+const router = useRouter(); // Initialize the router
+
+const errorMessage = ref("");
+const apiUrl = "http://localhost:5258/paths";
+
+const fetchPath = async () => {
+  try {
+    const response = await axios.get(apiUrl);
+    paths.value = response.data;
+  } catch (error) {
+    errorMessage.value = "Failed to fetch maps: " + error.message;
+  }
+};
+
+const deletePath = async (path) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this map?"
+  );
+  if (confirmDelete) {
+    try {
+      await axios.delete(`${apiUrl}/${map.id}`);
+      fetchMaps();
+      window.alert("Map successfully deleted!");
+    } catch (error) {
+      errorMessage.value = "Failed to delete map: " + error.message;
+    }
+  }
+};
+
+const editPath = (path) => {
+  // Use router to navigate to "/edit" and pass the map data as a parameter
+  router.push({
+    name: "edit-path", // replace 'edit-map' with the name of your edit route
+    params: { pathId: path.id }, // adjust this based on the structure of your route
+  });
+};
+
+// Call fetchMaps on component mount
+onMounted(() => {
+  fetchPath();
+});
+</script>
 
 <style scoped>
+#delete {
+  color: #9f0000;
+}
+#edit {
+  color: #2032ff;
+}
+#detail {
+  color: #00751f;
+}
+.d-flex .material-symbols-outlined {
+  border: none;
+  background: none;
+  justify-content: space-between;
+}
 .d-flex {
   align-self: flex-end;
 }

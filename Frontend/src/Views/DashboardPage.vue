@@ -1,8 +1,10 @@
 <template>
-  <h5>Ini Das</h5>
+  <div class="container">
+    <div class="card bg-light-subtle">
+      <div class="card-body"></div>
+    </div>
+  </div>
 </template>
-<script>
-export default {};
-</script>
+<script setup></script>
 
 <style></style>

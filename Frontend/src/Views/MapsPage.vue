@@ -23,7 +23,7 @@
             />
           </form>
         </div>
-        <table class="table table-striped">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th scope="col">#ID</th>
@@ -32,13 +32,94 @@
               <th scope="col">Action</th>
             </tr>
           </thead>
+          <tbody v-if="maps.length > 0">
+            <tr v-for="map in maps" :key="map.id">
+              <td>{{ map.id }}</td>
+              <td>{{ map.name }}</td>
+
+              <td>{{ map.creator }}</td>
+              <td colspan="">
+                <div class="d-flex">
+                  <button
+                    class="material-symbols-outlined"
+                    @click="detailMap(map)"
+                  >
+                    visibility
+                  </button>
+                  <button
+                    id="edit"
+                    class="material-symbols-outlined"
+                    @click="editMaps(map)"
+                  >
+                    edit
+                  </button>
+
+                  <br />
+                  <button
+                    id="delete"
+                    class="material-symbols-outlined"
+                    @click="deleteMaps(map)"
+                  >
+                    delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import axios from "axios";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router"; // Import useRouter
+
+const maps = ref([]);
+const router = useRouter(); // Initialize the router
+
+const errorMessage = ref("");
+const apiUrl = "http://localhost:5258/maps";
+
+const fetchMaps = async () => {
+  try {
+    const response = await axios.get(apiUrl);
+    maps.value = response.data;
+  } catch (error) {
+    errorMessage.value = "Failed to fetch maps: " + error.message;
+  }
+};
+
+const deleteMaps = async (map) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this map?"
+  );
+  if (confirmDelete) {
+    try {
+      await axios.delete(`${apiUrl}/${map.id}`);
+      fetchMaps();
+      window.alert("Map successfully deleted!");
+    } catch (error) {
+      errorMessage.value = "Failed to delete map: " + error.message;
+    }
+  }
+};
+
+const editMaps = (map) => {
+  // Use router to navigate to "/edit" and pass the map data as a parameter
+  router.push({
+    name: "edit-map", // replace 'edit-map' with the name of your edit route
+    params: { mapId: map.id }, // adjust this based on the structure of your route
+  });
+};
+
+// Call fetchMaps on component mount
+onMounted(() => {
+  fetchMaps();
+});
+</script>
 
 <style scoped>
 input {
@@ -94,5 +175,17 @@ p {
 }
 th {
   font-size: 13px;
+}
+.d-flex .material-symbols-outlined {
+  margin-left: 20px;
+  margin-right: -20px;
+  border: none;
+  background: none;
+}
+#delete {
+  color: #e30000;
+}
+#edit {
+  color: #0569ff;
 }
 </style>

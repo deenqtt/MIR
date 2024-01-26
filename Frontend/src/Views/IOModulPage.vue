@@ -7,7 +7,7 @@
 
     <p>Customize I/O Here</p>
 
-    <button class="btn btn-success">Create Path</button>
+    <button class="btn btn-success">Create Connection</button>
 
     <div class="card bg-light">
       <div class="card-header">Internal IO MIR</div>
@@ -133,7 +133,7 @@ p {
 }
 .btn {
   text-align: center;
-  width: 120px;
+  width: auto;
   color: #000;
   font-size: 12px;
   font-weight: 600;

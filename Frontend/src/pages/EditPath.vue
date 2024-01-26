@@ -1,42 +1,48 @@
 <template>
   <div class="container">
     <h5>
-      Created
+      Edit
       <span>Path</span>
     </h5>
-
-    <p>Create and Design Your Path Here</p>
-    <router-link to="/Path" class="btn btn-light"> Back</router-link>
-
+    <br />
+    <div class="d-flex">
+      <router-link to="/Path" class="btn btn-light"> Back</router-link>
+      <router-link to="/Path" class="btn btn-success"> Save</router-link>
+    </div>
     <div class="card bg-light">
       <div class="card-body form-flex">
         <div class="form-group">
-          <label for="Name">Name</label>
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Input Your Path Name"
-          />
+          <label for="Start">Start</label>
+          <div class="input-group">
+            <input type="text" readonly class="form-control with-button" />
+            <div class="input-group-append">
+              <button class="material-symbols-outlined">near_me</button>
+            </div>
+          </div>
         </div>
         <div class="form-group">
-          <label for="Select">Select Robot</label>
-          <select
-            id="Select"
-            class="custom-select form-control"
-            placeholder="Select Your Own Map"
-          ></select>
+          <label for="Goal">Goal</label>
+          <div class="input-group">
+            <input type="text" readonly class="form-control with-button" />
+            <div class="input-group-append">
+              <button class="material-symbols-outlined">near_me</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="Distance">Distance</label>
+          <input type="text" readonly class="form-control" />
         </div>
       </div>
     </div>
 
     <br />
-    //Card Untuk Canvas Dibawah ini
+
     <div class="card bg-light">
       <div class="card-header">
-        <p>Created Your Design</p>
+        <p>Select Your Start And Goal</p>
       </div>
-      <div class="card-body"></div>
-      <div class="card-footer"></div>
+      <div class="card-body"><canvas style="width: 100%"></canvas></div>
     </div>
   </div>
 </template>
@@ -44,6 +50,10 @@
 <script setup></script>
 
 <style scoped>
+canvas {
+  border: #000 solid 1px;
+  height: 100px;
+}
 .container {
   font-family: "Poppins", sans-serif;
   display: flex;
@@ -70,7 +80,6 @@ p {
 
 .btn {
   text-align: center;
-  width: 120px;
   color: #000;
   font-size: 12px;
   font-weight: 600;
@@ -79,6 +88,7 @@ p {
   margin-right: 40px;
   margin-top: -10px;
   margin-bottom: 10px;
+  border-radius: 10px;
 }
 
 .card {
@@ -87,8 +97,10 @@ p {
 }
 
 .card-header {
+  margin: 10px;
+  border-radius: 10px;
   font-size: 15px;
-
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
@@ -96,7 +108,7 @@ p {
 .card-header p {
   font-size: 12px;
   font-weight: 500;
-
+  margin-top: -20px;
   margin-bottom: -20px;
 }
 

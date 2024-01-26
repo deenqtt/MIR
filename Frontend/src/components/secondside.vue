@@ -42,9 +42,14 @@
               </a>
               <div class="dropdown-menu" aria-labelledby="robotDropdown">
                 <!-- Add your robot dropdown content here -->
-                <a class="dropdown-item" href="#">Robot 1</a>
-                <a class="dropdown-item" href="#">Robot 2</a>
-                <a class="dropdown-item" href="#">Robot 3</a>
+                <li
+                  class="dropdown-item"
+                  v-for="name in robotOptions"
+                  :key="name"
+                  :value="name"
+                >
+                  {{ name }}
+                </li>
               </div>
             </li>
 
@@ -126,18 +131,35 @@
 </template>
 
 <script setup>
+import axios from "axios";
 import { ref, onMounted, watch, toRefs } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const robotOptions = ref([]);
+const activeSubMenu = ref("");
+const fetchRobots = async () => {
+  try {
+    const response = await axios.get("http://localhost:5258/robots");
+    robotOptions.value = response.data.map((robot) => robot.name);
+  } catch (error) {
+    console.error("Error fetching robot names:", error);
+  }
+};
 const isSubMenuActive = (item) => {
   const routeName = router.currentRoute.value.name;
-  return routeName && routeName.toLowerCase() === item.toLowerCase();
+  const isActive = routeName && routeName.toLowerCase() === item.toLowerCase();
+  if (isActive) {
+    activeSubMenu.value = item;
+  }
+  console.log(`Route: ${routeName}, Active Submenu: ${activeSubMenu.value}`);
+  return isActive;
 };
+
 const { is_expanded, pageTitle, subMenu } = toRefs({
   is_expanded: ref(localStorage.getItem("is_expanded") === "true"),
   pageTitle: ref(""),
-  subMenu: ref([]), // Use an array to store multiple submenus
+  subMenu: ref([]),
 });
 
 const toggleMenu = () => {
@@ -146,16 +168,13 @@ const toggleMenu = () => {
 };
 
 onMounted(() => {
-  // Set initial page title and submenu based on the current route
+  console.log("Component mounted");
   updatePageTitle();
+  fetchRobots();
 });
 
 const updatePageTitle = () => {
   const routeName = router.currentRoute.value.name;
-  if (routeName === "Dashboard") {
-    pageTitle.value = "Dashboard";
-    subMenu.value = ["Dashboard"];
-  }
   const commonSubMenu = [
     "Maps",
     "Path",
@@ -164,44 +183,39 @@ const updatePageTitle = () => {
     "Modul",
     "User",
   ];
-
+  // const comonSubMenu = ["Robot", "Add Robot"];
   if (routeName === "Dashboard") {
     pageTitle.value = "Dashboard";
     subMenu.value = ["Dashboard"];
-  } else if (
-    routeName === "Setup" ||
-    routeName === "Maps" ||
-    routeName === "Path" ||
-    routeName === "Mission" ||
-    routeName === "Footprint" ||
-    routeName === "Modul" ||
-    routeName === "User"
-  ) {
+  } else if (routeName === "Setup" || commonSubMenu.includes(routeName)) {
     pageTitle.value = "Setup";
     subMenu.value = commonSubMenu;
-  } else if (
-    routeName === "Monitoring" ||
-    routeName === "System" ||
-    routeName === "Help"
-  ) {
+  } else if (["Monitoring", "System", "Help"].includes(routeName)) {
     pageTitle.value = routeName;
-    subMenu.value = [""];
+    // Menetapkan submenu sesuai dengan menu yang dipilih
+    if (routeName === "Monitoring") {
+      subMenu.value = ["Monitor"];
+    } else if (routeName === "System") {
+      subMenu.value = ["Setting"];
+    } else if (routeName === "Help") {
+      pageTitle.value = "Help";
+      subMenu.value = ["Robot", "Add Robot"];
+    }
   }
 };
 
 watch(
   () => router.currentRoute.value.name,
   () => {
-    // Watch for changes in the route and update the page title and submenu accordingly
     updatePageTitle();
   }
 );
-const scrollingText = ref(""); // bind scrollingText to the input field
-const isPlaying = ref(false); // track play/pause state
+
+const scrollingText = ref("");
+const isPlaying = ref(false);
 
 const togglePlayPause = () => {
   isPlaying.value = !isPlaying.value;
-  // Implement logic to start/stop scrolling text based on isPlaying value
   if (isPlaying.value) {
     startScrolling();
   } else {
@@ -239,6 +253,12 @@ input {
 }
 .submenu-item.active-submenu {
   h5 {
+    position: relative;
+    margin-top: 0;
+    padding: 5px 20px;
+    background-color: #f0f0f0;
+    color: #000000;
+
     &:before,
     &:after {
       content: "";
@@ -246,7 +266,7 @@ input {
       left: 0;
       right: 0;
       height: 1px;
-      background-color: #000000; // Set the color for the underline
+      background-color: #000000;
     }
 
     &:before {
@@ -257,6 +277,25 @@ input {
       bottom: -1px;
     }
   }
+}
+
+// Tambahkan aturan ini untuk menyimpan garis di atas dan bawah submenu saat submenu aktif
+.submenu-item.active-submenu:first-child h5:before,
+.submenu-item.active-submenu:last-child h5:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #000000;
+}
+
+.submenu-item.active-submenu:first-child h5:before {
+  top: -1px;
+}
+
+.submenu-item.active-submenu:last-child h5:after {
+  bottom: -1px;
 }
 .submenu-item {
   text-decoration: none;

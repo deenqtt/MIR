@@ -257,3 +257,4 @@ C:\Users\Administrator\Documents\MobileRobot\backend\obj\Debug\net8.0\Backend.pd
 C:\Users\Administrator\Documents\MobileRobot\backend\obj\Debug\net8.0\Backend.genruntimeconfig.cache
 C:\Users\Administrator\Documents\MobileRobot\backend\obj\Debug\net8.0\ref\Backend.dll
 C:\Users\Administrator\Documents\MobileRobot\backend\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\Administrator\Documents\MobileRobot\backend\obj\Debug\net8.0\Backend.sourcelink.json

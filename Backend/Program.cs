@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
 
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -23,6 +23,7 @@ builder.Services.AddCors(o =>
               .AllowAnyMethod()
               .AllowAnyHeader());
 });
+
 
 var app = builder.Build();
 
@@ -59,10 +60,6 @@ if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, user.Password))
 
     await context.Response.WriteAsync(JsonSerializer.Serialize(user));
 });
-
-
-
-
 
 // app.MapGet("/users", async (FullStackContext db) =>
 app.MapGet("/users", async (FullStackContext db) => //Field in the name backend context with your name Context (FullStackContext)
@@ -194,6 +191,7 @@ app.MapPut("/maps/{id}", async (int id, Map updatedMap, FullStackContext db) =>
 
     map.Name = updatedMap.Name;
     map.SiteName = updatedMap.SiteName;
+    map.Creator = updatedMap.Creator;
 
     await db.SaveChangesAsync();
     return Results.NoContent();
@@ -239,7 +237,8 @@ app.MapPut("/missions/{id}", async (int id, Mission updatedMission, FullStackCon
     if (mission is null) return Results.NotFound();
 
     mission.Name = updatedMission.Name;
-    mission.Date = updatedMission.Date;
+    mission.Robot = updatedMission.Robot;
+    mission.Site = updatedMission.Site;
     mission.Group = updatedMission.Group;
 
     await db.SaveChangesAsync();
@@ -286,6 +285,7 @@ app.MapPut("/paths/{id}", async (int id, Path updatedPath, FullStackContext db) 
     if (path is null) return Results.NotFound();
 
     path.Name = updatedPath.Name;
+    path.Map = updatedPath.Map;
     path.Start = updatedPath.Start;
     path.Goal = updatedPath.Goal;
     path.Distance = updatedPath.Distance;
@@ -312,21 +312,74 @@ app.MapGet("/footprints", async (FullStackContext db) =>
     await db.Footprints.ToListAsync());
 
 // Endpoint to get a single footprint by id
+app.MapGet("/footprints/{id}/image", async (int id, FullStackContext db) =>
+{
+    var footprint = await db.Footprints.FindAsync(id);
+
+    if (footprint == null || string.IsNullOrEmpty(footprint.ImageData))
+    {
+        // Handle case when footprint or image data is not found
+        context.Response.StatusCode = 404; // Not Found
+        return;
+    }
+
+    // Return the image data with the appropriate content type
+    context.Response.ContentType = "image/png";
+    await context.Response.Body.WriteAsync(Convert.FromBase64String(footprint.ImageData));
+});
+
 app.MapGet("/footprints/{id}", async (int id, FullStackContext db) =>
     await db.Footprints.FindAsync(id) is Footprint footprint ? Results.Ok(footprint) : Results.NotFound());
 
 // Endpoint to create a new footprint
-app.MapPost("/footprints", async (Footprint footprint, FullStackContext db) =>
+app.MapPost("/footprints", async (HttpContext context, FullStackContext db) =>
 {
-    // Add the footprint to the database
-    db.Footprints.Add(footprint);
+    try
+    {
+        var form = await context.Request.ReadFormAsync();
 
-    // Save changes to the database
-    await db.SaveChangesAsync();
+        var name = form["Name"];
+        var robotname = form["Robotname"];
 
-    // Return the created footprint with the appropriate status code and location header
-    return Results.Created($"/footprints/{footprint.Id}", footprint);
+        // Process the image file
+        var file = form.Files["file"];
+
+        // Convert the image file to binary data
+        byte[] imageData;
+        using (var memoryStream = new MemoryStream())
+        {
+            await file.CopyToAsync(memoryStream);
+            imageData = memoryStream.ToArray();
+        }
+
+        // Add the footprint to the database
+        var newFootprint = new Footprint
+        {
+            Name = name,
+            Robotname = robotname,
+            ImageData = imageData
+        };
+
+        db.Footprints.Add(newFootprint);
+
+        // Save changes to the database
+        await db.SaveChangesAsync();
+
+        // Return the created footprint with the appropriate status code and location header
+        context.Response.Headers["Location"] = $"/footprints/{newFootprint.Id}";
+        context.Response.StatusCode = 201; // Created
+
+        // Optionally, you can return a response body with the created footprint
+        await context.Response.WriteAsync(JsonSerializer.Serialize(newFootprint));
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = 500; // Internal Server Error
+        await context.Response.WriteAsync($"Error: {ex.Message}");
+    }
 });
+
+
 
 // Endpoint to update a footprint
 app.MapPut("/footprints/{id}", async (int id, Footprint updatedFootprint, FullStackContext db) =>
@@ -336,6 +389,7 @@ app.MapPut("/footprints/{id}", async (int id, Footprint updatedFootprint, FullSt
 
     footprint.Name = updatedFootprint.Name;
     footprint.Robotname = updatedFootprint.Robotname;
+    footprint.ImageData = updatedFootprint.ImageData;
 
     await db.SaveChangesAsync();
     return Results.NoContent();
@@ -354,8 +408,6 @@ app.MapDelete("/footprints/{id}", async (int id, FullStackContext db) =>
     return Results.NotFound();
 });
 
-
-
 app.UseCors();
 app.Run();
 
@@ -368,6 +420,8 @@ public class FullStackContext : DbContext
     public DbSet<Path> Paths { get; set; } //Table User
     public DbSet<Mission> Missions { get; set; } //Table User
     public DbSet<Footprint> Footprints { get; set; } //Table User
+    
+   
     public FullStackContext(DbContextOptions<FullStackContext> options) : base(options) { }
 
 }
@@ -393,11 +447,13 @@ public class Map
     public int Id {get; set;}
     public string? Name {get; set;}
     public string? SiteName {get; set;}
+    public string? Creator {get; set;}
 }
 public class Path
 {
     public int Id {get; set;}
     public string? Name {get; set;}
+    public string? Map {get; set;}
     public string? Start {get; set;}
     public string? Goal {get; set;}
     public string? Distance {get; set;}
@@ -406,12 +462,14 @@ public class Mission
 {
     public int Id {get; set;}
     public string? Name {get; set;}
-    public DateTime Date {get; set;}
+    public string? Robot {get; set;}
+    public string? Site {get; set;}
     public string? Group {get; set;}
 }
 public class Footprint
 {
-    public int Id {get; set;}
-    public string? Name {get; set;}
-    public string? Robotname {get; set;}
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    public string? Robotname { get; set; }
+    public byte[]? ImageData { get; set; } // This column will store the binary image data
 }

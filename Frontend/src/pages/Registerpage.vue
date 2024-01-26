@@ -20,6 +20,7 @@
           placeholder="Input Password"
           required
           class="form-control"
+          @input="validatePassword"
         />
 
         <label for="Phone">Phone</label>
@@ -27,11 +28,13 @@
           v-model="newUser.phone"
           type="text"
           class="form-control"
-          placeholder="Input Number"
+          placeholder="Input Number (e.g., +621234567890)"
           required
         />
+        <span v-if="phoneValidationError" class="error-message">{{
+          phoneValidationError
+        }}</span>
         <br />
-
         <button type="submit" class="btn btn-success">Register</button>
         <span
           >Have an account??
@@ -39,18 +42,21 @@
         >
       </form>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <span v-if="passwordValidationError" class="error-message">{{
+        passwordValidationError
+      }}</span>
     </div>
   </div>
 </template>
-
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 
 const users = ref([]);
 const newUser = ref({ username: "", password: "", phone: "" });
 const errorMessage = ref("");
+const phoneValidationError = ref("");
 
 const router = useRouter();
 const apiUrl = "http://localhost:5258/users";
@@ -64,7 +70,27 @@ const fetchUsers = async () => {
   }
 };
 
+const validatePhoneNumber = () => {
+  const phone = newUser.value.phone || "";
+  const isValid = /^(?:\+62|0)[1-9]\d*$/.test(phone);
+
+  if (!isValid) {
+    phoneValidationError.value = "I Please use +62 or start with 0.";
+  } else {
+    phoneValidationError.value = "";
+  }
+};
+
+watchEffect(() => {
+  validatePhoneNumber();
+});
+
 const createUser = async () => {
+  // Check phone number format before creating the user
+  validatePhoneNumber();
+  if (phoneValidationError.value) {
+    return;
+  }
   // Check if username or phone already exists
   const usernameExists = users.value.some(
     (user) => user.username === newUser.value.username
@@ -74,8 +100,7 @@ const createUser = async () => {
   );
 
   if (usernameExists || phoneExists) {
-    errorMessage.value =
-      "Username or phone already registered. Please choose a different one.";
+    errorMessage.value = "Username or phone already registered.";
     return;
   }
 
@@ -86,6 +111,23 @@ const createUser = async () => {
     router.push("/");
   } catch (error) {
     errorMessage.value = "Failed to create user: " + error.message;
+  }
+};
+const passwordValidationError = ref("");
+
+const validatePassword = () => {
+  const password = newUser.value.password || "";
+
+  // Password strength criteria
+
+  const isLengthValid = password.length >= 8;
+
+  // Evaluate password strength
+  if (!isLengthValid) {
+    passwordValidationError.value =
+      "Password must contain at least 8 characters long.";
+  } else {
+    passwordValidationError.value = "";
   }
 };
 

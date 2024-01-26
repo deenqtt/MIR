@@ -25,7 +25,7 @@
     <div class="flex"></div>
 
     <div class="menu">
-      <router-link to="/help" class="button">
+      <router-link to="/robot" class="button">
         <span class="material-symbols-outlined">help</span>
       </router-link>
       <button class="tombol">

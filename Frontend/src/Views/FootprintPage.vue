@@ -25,25 +25,113 @@
             />
           </form>
         </div>
+
         <table class="table table-striped">
           <thead>
             <tr>
               <th scope="col">#ID</th>
               <th scope="col">Name</th>
               <th scope="col">Robot</th>
-              <th scope="col">Date</th>
+
               <th scope="col">Action</th>
             </tr>
           </thead>
+          <tbody v-if="footprints.length > 0">
+            <tr v-for="footprint in footprints" :key="footprint.id">
+              <td>{{ footprint.id }}</td>
+              <td>{{ footprint.name }}</td>
+              <td>{{ footprint.robotname }}</td>
+
+              <td colspan="">
+                <div class="d-flex">
+                  <button
+                    id="detail"
+                    class="material-symbols-outlined"
+                    @click="detailPath(footprint)"
+                  >
+                    visibility
+                  </button>
+                  <button
+                    id="edit"
+                    class="material-symbols-outlined"
+                    @click="editPath(footprint)"
+                  >
+                    edit
+                  </button>
+
+                  <br />
+                  <button
+                    id="delete"
+                    class="material-symbols-outlined"
+                    @click="deleteDesign(footprint)"
+                  >
+                    delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import axios from "axios";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router"; // Import useRouter
+
+const footprints = ref([]);
+const router = useRouter(); // Initialize the router
+
+const errorMessage = ref("");
+const apiUrl = "http://localhost:5258/footprints";
+
+const fetchDesign = async () => {
+  try {
+    const response = await axios.get(apiUrl);
+    footprints.value = response.data;
+  } catch (error) {
+    errorMessage.value = "Failed to fetch maps: " + error.message;
+  }
+};
+
+const deleteDesign = async (user) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this map?"
+  );
+  if (confirmDelete) {
+    try {
+      await axios.delete(`${apiUrl}/${user.id}`);
+      fetchUser();
+      window.alert("Map successfully deleted!");
+    } catch (error) {
+      errorMessage.value = "Failed to delete map: " + error.message;
+    }
+  }
+};
+
+const editPath = (footprint) => {
+  // Use router to navigate to "/edit" and pass the map data as a parameter
+  router.push({
+    name: "edit-footprint",
+    params: { id: footprint.id },
+  });
+};
+
+// Call fetchMaps on component mount
+onMounted(() => {
+  fetchDesign();
+});
+</script>
 
 <style scoped>
+.d-flex .material-symbols-outlined {
+  border: none;
+  background: none;
+}
+
 .d-flex {
   align-self: flex-end;
 }
