@@ -1,36 +1,46 @@
 <template>
   <div class="container">
-    <h2>LOGIN</h2>
+    <div class="login-page">
+      <h2>LOGIN</h2>
 
-    <div class="card-body bg-dark">
-      <form @submit.prevent="loginUser">
-        <label for="username">Username</label>
-        <input
-          v-model="login.username"
-          type="text"
-          class="form-control"
-          placeholder="Input Username"
-          required
-        />
-
-        <label for="password">Password</label>
-        <input
-          v-model="login.password"
-          type="password"
-          placeholder="Input Password"
-          required
-          class="form-control"
-        />
-        <br />
-        <button type="submit" class="btn btn-success">LOGIN</button>
-        <p>
-          Not Have Account? Please
-          <router-link to="/authentication" class="router"
-            >Register</router-link
-          >
-        </p>
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-      </form>
+      <div class="card-body shadow-lg bg-light">
+        <form @submit.prevent="loginUser">
+          <div class="input">
+            <input
+              class="input__input border-rose-600"
+              placeholder=" "
+              v-model="login.username"
+            />
+            <label class="input__label">Username</label>
+          </div>
+          <br /><br />
+          <div class="input">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              class="input__input"
+              placeholder=" "
+              v-model="login.password"
+            />
+            <label class="input__label">Password</label>
+            <button
+              class="toggle-password"
+              @click.prevent="togglePasswordVisibility"
+            >
+              <i v-if="showPassword" class="fa-solid fa-eye-slash"></i>
+              <i v-else class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <br />
+          <button type="submit" class="btn btn-success">LOGIN</button>
+          <p>
+            Not Have Account? Please
+            <router-link to="/authentication" class="router"
+              >Register</router-link
+            >
+          </p>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -44,7 +54,11 @@ const apiUrl = "http://localhost:5258";
 const router = useRouter();
 const login = ref({ username: "", password: "" });
 const errorMessage = ref("");
+const showPassword = ref(false);
 
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
 const loginUser = async () => {
   try {
     // Make a POST request to your backend API for user authentication
@@ -72,43 +86,97 @@ const loginUser = async () => {
 
 <style scoped>
 /* Your existing styles go here */
+.input {
+  position: relative;
+  font-size: 16px;
+  border-radius: 5px;
+}
+.input {
+  position: relative;
+}
 
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 5; /* Tambahkan z-index yang lebih tinggi */
+}
+
+.input__input {
+  padding: 25px 10px 15px 10px;
+  color: #000000;
+  background-color: transparent;
+  position: relative;
+  z-index: 3;
+}
+
+.input__label {
+  display: flex;
+  padding-left: 1.5rem;
+  padding-bottom: 1rem;
+  color: rgba(0, 0, 0, 0.75);
+  width: 100%;
+  left: 0;
+  height: 100%;
+  position: absolute;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  top: 0;
+  transition: 0.3s;
+  font-weight: 300;
+  align-items: center;
+  letter-spacing: 1px;
+  z-index: 2;
+  font-size: inherit;
+}
+
+.input__input:focus + .input__label,
+.input__input:not(:placeholder-shown) + .input__label {
+  transform: translateY(-30px);
+  padding-left: 1rem;
+  font-size: 12px;
+  color: #6c6c6c;
+}
 .error-message {
   color: red;
   margin-top: 10px;
   margin-left: 35px;
 }
-.container {
-  margin-top: 60px;
+
+.login-page {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .card-body {
-  color: white;
+  color: rgb(0, 0, 0);
   border-radius: 10px;
 }
 h2 {
   font-family: "Poppins", sans-serif;
-  font-weight: 600;
+  font-weight: 800;
   margin-bottom: 20px;
+  background: linear-gradient(to right, #142896 0%, #330867 100%);
+  background-clip: text;
+  color: transparent;
 }
-label {
-  font-family: "Poppins", sans-serif;
-  margin: 10px;
-  font-weight: 500;
-}
+
 input {
-  font-size: 12px;
   font-family: "Poppins", sans-serif;
   font-weight: 500;
-  opacity: 20%;
+
   width: 300px;
   height: 30px;
   margin-left: 10px;
   border-radius: 10px;
   margin-right: 10px;
+
+  color: #000;
 }
 .btn {
   color: #000;
@@ -119,17 +187,21 @@ input {
   border-radius: 10px;
   margin-left: 10px;
 }
-
+label {
+  font-family: "Poppins", sans-serif;
+  margin: 8px;
+  font-weight: 500;
+}
 p {
   margin: 10px;
   margin-left: 10px;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
-  color: #ababab;
+  color: #000000;
 }
 .router {
   text-decoration: none;
-  color: #ababab;
+  color: #000000;
   margin-left: 5px;
 }
 .router:hover {
@@ -160,5 +232,10 @@ p {
     font-size: 14px;
     margin: 10px;
   }
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>

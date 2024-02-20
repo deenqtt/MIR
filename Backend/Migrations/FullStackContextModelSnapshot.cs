@@ -78,6 +78,29 @@ namespace Backend.Migrations
                     b.ToTable("Missions");
                 });
 
+            modelBuilder.Entity("Modul", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PortIn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PortOut")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Moduls");
+                });
+
             modelBuilder.Entity("Path", b =>
                 {
                     b.Property<int>("Id")

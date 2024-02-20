@@ -12,12 +12,15 @@ import User from "../Views/UserPage.vue";
 import Modul from "../Views/IOModulPage.vue";
 import Footprint from "../Views/FootprintPage.vue";
 import Mission from "../Views/MissionPage.vue";
-import Add from "../Views/AddNew.vue";
+import AddRobot from "../Views/AddNew.vue";
 const routes = [
   {
     path: "/authentication",
     name: "Register",
     component: Register,
+    meta: {
+      requiresAuth: false, // Set to true for protected routes
+    },
   },
   {
     path: "/",
@@ -52,7 +55,7 @@ const routes = [
   },
 
   {
-    path: "/Robot",
+    path: "/Help",
     name: "Help",
     component: Help,
   },
@@ -77,30 +80,22 @@ const routes = [
     component: Footprint,
   },
   {
-    path: "/Add Robot",
-    name: "AddNew",
-    component: Add,
+    path: "/addrobot",
+    name: "AddRobot",
+    component: AddRobot,
   },
-  {
-    path: "/Maps/Created",
-    Name: "NewMap",
-    component: () => import("../pages/CreateMapPage.vue"),
-  },
+
   {
     path: "/Maps/Created/New",
     Name: "New",
     component: () => import("../log/createdMaps.vue"),
   },
   {
-    path: "/Path/New",
-    Name: "NewPath",
-    component: () => import("../pages/CreatePathPage.vue"),
+    path: "/test",
+    Name: "tet",
+    component: () => import("../components/test.vue"),
   },
-  {
-    path: "/Mission/New",
-    Name: "NewMission",
-    component: () => import("../pages/CreateMissionPage.vue"),
-  },
+
   {
     path: "/Mission/Created/New",
     Name: "Miss",
@@ -108,21 +103,27 @@ const routes = [
   },
 
   {
-    path: "/edit/:mapId",
-    name: "edit-map",
-    component: () => import("../pages/EditMap.vue"),
-    props: true,
-  },
-  {
-    path: "/edit/:pathId",
+    path: "/edit-path/:id",
     name: "edit-path",
     component: () => import("../pages/EditPath.vue"),
     props: true,
   },
   {
-    path: "/edit/:missionId",
+    path: "/edit-mission/:id",
     name: "edit-mission",
     component: () => import("../pages/EditMission.vue"),
+    props: true,
+  },
+  {
+    path: "/edit-map/:id",
+    name: "edit-map",
+    component: () => import("../pages/EditMap.vue"),
+    props: true,
+  },
+  {
+    path: "/edit-user/:id",
+    name: "edit-user",
+    component: () => import("../pages/EditUser.vue"),
     props: true,
   },
   {
@@ -135,11 +136,31 @@ const routes = [
     name: "Canvas",
     component: () => import("../components/canvas.vue"),
   },
+  {
+    path: "/coice",
+    name: "c",
+    component: () => import("../components/choice.vue"),
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+router.beforeEach((to, from, next) => {
+  console.log("Navigation guard triggered");
+  const isAuthenticated = JSON.parse(localStorage.getItem("authenticated"));
+
+  if (!isAuthenticated && to.meta.requiresAuth) {
+    console.log("Redirecting to Login");
+    next({ name: "Login" });
+  } else if (isAuthenticated && to.name === "Login") {
+    console.log("Redirecting to Dashboard");
+    next({ name: "Dashboard" });
+  } else {
+    console.log("Continuing with navigation");
+    next();
+  }
 });
 
 export default router;

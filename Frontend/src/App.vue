@@ -1,37 +1,36 @@
-<script>
-import Sidebar from "./components/sidebarpage.vue";
-import SecondSide from "./components/secondside.vue";
-
-export default {
-  name: "App",
-  components: {
-    Sidebar,
-    SecondSide,
-  },
-  computed: {
-    showSidebar() {
-      const exemptedPages = ["/", "/authentication"];
-      const isExemptedPage = exemptedPages.includes(this.$route.path);
-
-      return !isExemptedPage;
-    },
-  },
-};
-</script>
-
 <template>
-  <div class="app">
+  <div class="app" :class="{ 'with-sidebar': showSidebar }">
     <!-- sidebar -->
     <Sidebar v-if="showSidebar" />
     <SecondSide v-if="showSidebar" />
-
-    <main>
+    <main
+      :style="{
+        background: isExemptedPage ? height : isExemptedPage ? '100%' : 'auto',
+      }"
+    >
       <!-- Content -->
-
       <router-view />
     </main>
   </div>
 </template>
+
+<script setup>
+import Sidebar from "./components/sidebarpage.vue";
+import SecondSide from "./components/secondside.vue";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const showSidebar = computed(() => {
+  const exemptedPages = ["/", "/authentication"];
+  return !exemptedPages.includes(router.currentRoute.value.path);
+});
+
+const isExemptedPage = computed(() => {
+  const exemptedPages = ["/", "/authentication"];
+  return exemptedPages.includes(router.currentRoute.value.path);
+});
+</script>
 
 <style lang="scss" scoped>
 :root {
@@ -40,19 +39,19 @@ export default {
   --grey: #64748b;
   --dark: #1e293b;
   --dark-alt: #334155;
-  --light: #f1f5f9;
+  --light: #ffffff;
   --sidebar-width: 800px;
 }
 
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+
   font-family: "Fira sans", sans-serif;
 }
 
-body {
-  background: var(--light);
+main {
+  background: #ffffff;
 }
 
 button {

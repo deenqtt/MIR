@@ -1,32 +1,51 @@
 <template>
+  <!-- Container div -->
   <div class="container">
+    <!-- Konten lainnya -->
     <h5>
       Pat
       <span>h</span>
     </h5>
-
     <p>Create and Design Your Path Here</p>
     <div class="d-flex">
-      <button class="btn btn-danger mr-2">Delete All</button>
-      <router-link to="/Path/New" class="btn btn-success"
-        >Create Path</router-link
+      <button
+        class="btn btn-danger mr-2"
+        v-if="!showCreateForm"
+        @click="deleteAllPaths"
       >
+        Delete All
+      </button>
+      <button
+        class="btn btn-success"
+        v-if="!showCreateForm"
+        @click="showCreateForm = true"
+      >
+        Create Path
+      </button>
     </div>
-    <div class="card bg-light">
+    <div class="card bg-light" v-if="!showCreateForm">
       <div class="card-header">List Path</div>
       <div class="card-body">
         <div class="d-flex align-items-center">
           <p class="mr-2">Search</p>
-          <form class="form-inline my-2 my-lg-0">
+          <div class="group">
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+              <g>
+                <path
+                  d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"
+                ></path>
+              </g>
+            </svg>
             <input
-              class="form-control mr-sm-2"
+              placeholder="Search"
               type="search"
-              placeholder="Search By Name"
-              aria-label="Search"
+              class="input"
+              v-model="searchTerm"
+              @input="fetchPath"
             />
-          </form>
+          </div>
         </div>
-        <table class="table table-striped">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th scope="col">#ID</th>
@@ -47,28 +66,21 @@
               <td colspan="">
                 <div class="d-flex">
                   <button
+                    class="fa-solid fa-eye"
                     id="detail"
-                    class="material-symbols-outlined"
                     @click="detailPath(path)"
-                  >
-                    visibility
-                  </button>
+                  ></button>
                   <button
+                    class="fa-solid fa-pen-to-square"
                     id="edit"
-                    class="material-symbols-outlined"
                     @click="editPath(path)"
-                  >
-                    edit
-                  </button>
-
+                  ></button>
                   <br />
                   <button
+                    class="fa-solid fa-eraser"
                     id="delete"
-                    class="material-symbols-outlined"
                     @click="deletePath(path)"
-                  >
-                    delete
-                  </button>
+                  ></button>
                 </div>
               </td>
             </tr>
@@ -76,21 +88,275 @@
         </table>
       </div>
     </div>
+    <form class="path" @submit.prevent="submitForm" v-if="showCreateForm">
+      <div class="d-flex">
+        <button class="btn btn-success" v-if="!ShowPath" type="submit">
+          Save
+        </button>
+        <button class="btn btn-light" @click="cancelForm">Back</button>
+      </div>
+      <div class="card bg-light">
+        <div class="card-body form-flex">
+          <div class="form-group">
+            <label id="name">Name</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Input Your Path Name"
+              v-model="newPath.Name"
+            />
+            <label id="select">Select Map</label>
+            <select class="form-control form-control-sm" v-model="newPath.Map">
+              <option value="" disabled selected>Select Map (Mapping)</option>
+              <option v-for="name in mapOptions" :key="name" :value="name">
+                {{ name }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label id="Start">Start</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control form-control-sm with-button"
+                v-model="newPath.Start"
+              />
+              <button
+                type="button"
+                class="fa-solid fa-arrow-pointer"
+                @click="selectStartPoint"
+              ></button>
+              <pre>{{ startPoint }}</pre>
+            </div>
+            <br />
+            <label id="Goal">Goal</label>
+            <div class="input-group">
+              <input
+                v-model="newPath.Goal"
+                id="endPoint"
+                type="text"
+                class="form-control form-control-sm with-button"
+              />
+              <button
+                type="button"
+                class="fa-solid fa-arrow-pointer"
+                @click="selectEndPoint"
+              ></button>
+              <pre>{{ endPoint }}</pre>
+            </div>
+          </div>
+          <div class="form-group">
+            <label id="Distance">Distance</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              v-model="newPath.Distance"
+            />{{ distance }}
+          </div>
+        </div>
+      </div>
+    </form>
+    <br />
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="pathDetailModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="pathDetailModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="pathDetailModalLabel">Path Detail</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Name:</strong> {{ selectedPath.name }}</p>
+            <p><strong>Start:</strong> {{ selectedPath.start }}</p>
+            <p><strong>Goal:</strong> {{ selectedPath.goal }}</p>
+            <p><strong>Distance:</strong> {{ selectedPath.distance }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
-
+const showCreateForm = ref(false);
+import Swal from "sweetalert2";
+import store from "../store";
+const searchTerm = ref("");
 const paths = ref([]);
 const router = useRouter(); // Initialize the router
-
+const startPoint = ref("");
+const endPoint = ref("");
+const distance = ref(null);
+const mapCanvas = ref(null);
+const mapOptions = ref([]);
+const newPath = ref({
+  Name: "",
+  Map: "",
+  Start: "",
+  Goal: "",
+  Distance: "",
+});
 const errorMessage = ref("");
 const apiUrl = "http://localhost:5258/paths";
+const selectedPoint = reactive({ x: null, y: null });
+const isSelectingStart = ref(true);
+const selectedPath = reactive({});
+const submitForm = async () => {
+  try {
+    if (
+      !newPath.value.Name ||
+      !newPath.value.Map ||
+      !newPath.value.Start ||
+      !newPath.value.Goal
+    ) {
+      // Show an alert or set an error message indicating that the form is incomplete
+      window.alert("Please fill in all fields.");
+      return;
+    }
+    const response = await axios.post(apiUrl, newPath.value);
+    console.log(response.data);
 
+    const pathsResponse = await axios.get(apiUrl);
+    paths.value = pathsResponse.data;
+    store.commit("addNotification", "Path created!");
+    // Clear the form fields after successful submission
+    newPath.value = {
+      Name: "",
+      Map: "",
+      Start: "",
+      Goal: "",
+      Distance: "",
+    };
+
+    // Show success message using SweetAlert
+    await Swal.fire("Success!", "Path successfully created!", "success");
+
+    // Redirect to "/path" after success
+    router.push("/path");
+  } catch (error) {
+    console.error(error);
+    errorMessage.value = "Failed to create map: " + error.message;
+  }
+};
+
+const cancelForm = () => {
+  // Reset form and navigate back to the list view
+  newPath.value = {
+    Name: "",
+    Map: "",
+    Start: "",
+    Goal: "",
+    Distance: "",
+  };
+  showCreateForm.value = false;
+
+  // Show confirmation using SweetAlert
+  Swal.fire({
+    title: "Are you sure?",
+    text: "Changes will not be saved!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, cancel!",
+    cancelButtonText: "No, keep it",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Navigate back to the list view if user confirms
+      router.push("/path");
+    }
+  });
+};
+
+// Update detailPath method to set selectedPath
+const detailPath = (path) => {
+  selectedPath.name = path.name;
+  selectedPath.start = path.start;
+  selectedPath.goal = path.goal;
+  selectedPath.distance = path.distance;
+  $("#pathDetailModal").modal("show");
+};
 const fetchPath = async () => {
+  try {
+    const response = await axios.get(apiUrl);
+    const allPaths = response.data;
+
+    // Filter paths based on the search term
+    paths.value = allPaths.filter((path) =>
+      path.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+    );
+  } catch (error) {
+    errorMessage.value = "Failed to fetch maps: " + error.message;
+  }
+};
+const deleteAllPaths = async () => {
+  // Gunakan SweetAlert untuk konfirmasi penghapusan
+  const confirmDelete = await Swal.fire({
+    title: "Are You Sure To Delete All Path?",
+    text: "You will not be able to return this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    cancelButtonText: "Cancel",
+    confirmButtonText: "Delete",
+  });
+
+  if (confirmDelete) {
+    try {
+      await axios.delete(apiUrl); // Assuming this will delete all paths, adjust the URL accordingly
+      fetchPath(); // Fetch the updated list of paths after deletion
+      await Swal.fire("Success!", "Path Deleted All.", "success");
+    } catch (error) {
+      errorMessage.value = "Failed to delete all paths: " + error.message;
+    }
+  }
+};
+
+const deletePath = async (path) => {
+  // Gunakan SweetAlert untuk konfirmasi penghapusan
+  const confirmDelete = await Swal.fire({
+    title: "Are You Sure To Delete?",
+    text: "You will not be able to return this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete!",
+    cancelButtonText: "Cancel",
+  });
+
+  if (confirmDelete.isConfirmed) {
+    try {
+      // Hapus pengguna jika pengguna mengkonfirmasi
+      await axios.delete(`${apiUrl}/${path.id}`);
+      fetchPath();
+      // Tampilkan pesan sukses menggunakan SweetAlert
+      await Swal.fire("Berhasil!", "Path berhasil dihapus.", "success");
+    } catch (error) {
+      errorMessage.value = "Failed to delete user: " + error.message;
+    }
+  }
+};
+
+const fetchPaths = async () => {
   try {
     const response = await axios.get(apiUrl);
     paths.value = response.data;
@@ -99,54 +365,224 @@ const fetchPath = async () => {
   }
 };
 
-const deletePath = async (path) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this map?"
-  );
-  if (confirmDelete) {
-    try {
-      await axios.delete(`${apiUrl}/${map.id}`);
-      fetchMaps();
-      window.alert("Map successfully deleted!");
-    } catch (error) {
-      errorMessage.value = "Failed to delete map: " + error.message;
-    }
+const fetchMaps = async () => {
+  try {
+    const response = await axios.get("http://localhost:5258/maps");
+    mapOptions.value = response.data.map((map) => map.name);
+  } catch (error) {
+    console.error("Error fetching robot names:", error);
   }
 };
 
-const editPath = (path) => {
-  // Use router to navigate to "/edit" and pass the map data as a parameter
-  router.push({
-    name: "edit-path", // replace 'edit-map' with the name of your edit route
-    params: { pathId: path.id }, // adjust this based on the structure of your route
-  });
+const canvasClick = (event) => {
+  const canvas = (event && event.target) || mapCanvas.value;
+
+  if (!canvas) {
+    console.error("Canvas element is null or undefined");
+    return;
+  }
+
+  const rect = canvas.getBoundingClientRect();
+  // ...
 };
 
-// Call fetchMaps on component mount
+const drawMap = () => {
+  const canvas = mapCanvas.value;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw fake map
+  ctx.fillStyle = "#c0c0c0";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw starting point
+  drawPoint(ctx, startPoint.value, "green");
+
+  // Draw ending point
+  drawPoint(ctx, endPoint.value, "red");
+
+  // Draw line between start and end points
+  if (startPoint.value && endPoint.value) {
+    drawLine(ctx, startPoint.value, endPoint.value);
+    calculateDistance();
+  }
+};
+
+const drawPoint = (ctx, point, color) => {
+  if (!point) return;
+  const [x, y] = point.split(",").map(Number);
+  const radius = 5; // Adjust the radius as needed
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.fillStyle = "black";
+  ctx.fillText(`(${Math.round(x)},${Math.round(y)})`, x + 10, y - 10);
+};
+
+const drawLine = (ctx, startPoint, endPoint) => {
+  const [x1, y1] = startPoint.split(",").map(Number);
+  const [x2, y2] = endPoint.split(",").map(Number);
+
+  ctx.strokeStyle = "blue";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+};
+
+const selectStartPoint = () => {
+  isSelectingStart.value = true;
+  // Ubah nilai startPoint sesuai dengan koordinat yang dipilih (mungkin menggunakan selectedPoint)
+  newPath.Start = `${selectedPoint.x},${selectedPoint.y}`;
+  // Panggil fungsi untuk menggambar peta ulang setelah mengubah startPoint
+  drawMap();
+};
+
+const selectEndPoint = () => {
+  isSelectingStart.value = false;
+  newPath.Start = `${selectedPoint.x},${selectedPoint.y}`;
+  // Panggil fungsi untuk menggambar peta ulang setelah mengubah startPoint
+  drawMap();
+};
+
+const calculateDistance = () => {
+  const [x1, y1] = startPoint.value.split(",").map(Number);
+  const [x2, y2] = endPoint.value.split(",").map(Number);
+
+  // Basic distance calculation using Pythagorean theorem
+  const deltaX = x2 - x1;
+  const deltaY = y2 - y1;
+  const distanceInPixels = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+
+  // Assuming 1 pixel is equal to 1 meter
+  distance.value = distanceInPixels.toFixed(2) + " meters";
+};
+
+const editPath = (path) => {
+  selectedPath = path;
+  $("#pathEditModal").modal("show");
+};
+
 onMounted(() => {
-  fetchPath();
+  fetchPaths();
+  fetchMaps();
 });
 </script>
 
 <style scoped>
-#delete {
-  color: #9f0000;
+.group {
+  display: flex;
+  line-height: 28px;
+  align-items: center;
+  position: relative;
+  max-width: 190px;
 }
-#edit {
-  color: #2032ff;
+
+.group .input {
+  width: 100%;
+  height: 30px;
+  line-height: 28px;
+  padding: 0 1rem;
+  padding-left: 2.5rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  background-color: #ffffff;
+  color: #0d0c22;
+  transition: 0.3s ease;
+  box-shadow: 1px 1px 2px #000;
+}
+
+.group .input::placeholder {
+  color: #9e9ea7;
+}
+
+.input:focus,
+input:hover {
+  outline: none;
+  border-color: rgba(0, 10, 196, 0.4);
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(49, 13, 228, 0.1);
+}
+
+.group .icon {
+  position: absolute;
+  top: -1.1rem;
+  left: 0.6rem;
+  fill: #9e9ea7;
+  width: 1rem;
+  height: 1rem;
+}
+
+#name {
+  color: black;
+}
+#select {
+  color: black;
+}
+#Start {
+  color: black;
+}
+#Goal {
+  color: black;
+}
+#Distance {
+  color: black;
 }
 #detail {
-  color: #00751f;
+  border: none;
+  background-color: transparent;
+  color: #007bff;
+  cursor: pointer;
 }
-.d-flex .material-symbols-outlined {
+#edit {
+  border: none;
+  background-color: transparent;
+  color: #ffc107;
+  cursor: pointer;
+}
+#delete {
+  border: none;
+  background-color: transparent;
+  color: #dc3545;
+  cursor: pointer;
+}
+.canvas {
+  width: 100%;
+  height: 400px;
+  border: 2px solid #333;
+}
+.canvas canvas {
+  cursor: crosshair;
+}
+.with-button {
+  width: calc(100% - 40px);
+}
+canvas {
+  border: #000 solid 1px;
+  height: 100px;
+}
+
+.container .form-inline .form-control {
+  height: 30px;
+  font-size: 15px;
+  border-radius: 8px;
+}
+.d-flex .fa-solid {
   border: none;
   background: none;
-  justify-content: space-between;
+  font-size: 19px;
+}
+.fa-pen-to-square {
+  margin-left: 10px;
+  margin-right: 10px;
 }
 .d-flex {
   align-self: flex-end;
 }
-input {
+.container input {
   height: 20px;
   margin-top: -25px;
   font-size: 12px;
@@ -159,13 +595,14 @@ input {
 
 h5 {
   font-size: 25px;
-  font-weight: 500;
-  color: #193867;
+  font-weight: 700;
+  color: #0800ff;
+  margin-top: 20px;
 }
 
 span {
   font-size: 25px;
-  font-weight: 500;
+  font-weight: 700;
   color: #000;
   margin-left: -7px;
 }
@@ -173,9 +610,9 @@ span {
 p {
   margin-top: -10px;
   font-size: 12px;
-  font-weight: 100; /* Memberikan jarak atas antara h5 dan p */
+  font-weight: 500; /* Memberikan jarak atas antara h5 dan p */
 }
-.btn {
+.container .btn {
   text-align: center;
   width: 120px;
   color: #000;
@@ -184,12 +621,12 @@ p {
   height: 30px;
   align-self: flex-end;
   margin-right: 40px;
-  margin-top: -10px;
-  margin-bottom: 10px;
+  margin-top: -60px;
+  margin-bottom: 40px;
 }
 .card {
   margin-right: 40px;
-  box-shadow: 1px 2px 1px #000;
+  box-shadow: 5px 10px 8px #779bff;
   border-radius: 10px;
 }
 .card-header {
@@ -199,5 +636,45 @@ p {
 }
 th {
   font-size: 13px;
+}
+.path {
+  display: flex;
+  flex-direction: column;
+}
+.path .d-flex .btn {
+  margin-top: -60px;
+  margin-bottom: 40px;
+}
+.path .card #name {
+  margin-bottom: 30px;
+}
+.path .card #Start {
+  margin-bottom: 25px;
+}
+.path .card #Goal {
+  margin-bottom: 25px;
+}
+.path .card #Distance {
+  margin-bottom: 25px;
+}
+.path .input-group {
+  position: relative;
+  width: 100%;
+  display: flex;
+}
+
+.path .input-group input {
+  flex: 1;
+}
+
+.path .input-group button {
+  height: calc(25px + 1px);
+  position: absolute;
+  top: 80%;
+  right: 2px;
+  transform: translateY(-50%);
+  margin-top: -13px;
+  background: none;
+  border: none;
 }
 </style>

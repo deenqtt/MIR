@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="canvass">
     <div class="d-flex">
       <button class="btn btn-outline-primary" @click="clearCanvas">
         Clear Canvas
@@ -53,8 +53,8 @@
     <div class="card bg-light">
       <div class="card-body">
         <canvas
+          ref="canvasRef"
           style="width: 100%"
-          types="file"
           @mousedown="startDrawing"
           @mousemove="draw"
           @mouseup="stopDrawing"

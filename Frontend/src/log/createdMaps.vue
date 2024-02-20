@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-    <h5>
-      Nama
-      <span>Maps</span>
-    </h5>
-
-    <p>Create and Design Your Map Here</p>
-    <router-link to="/Maps" class="btn btn-light"> Back</router-link>
+    <br />
+    <br />
+    <br />
+    <div class="d-flex">
+      <router-link to="/Maps" class="btn btn-light"> Back</router-link>
+      <router-link to="/Maps" class="btn btn-success"> Save Maps</router-link>
+    </div>
     <div class="card bg-light">
       <div class="card-header">
         <div class="d-flex">
@@ -117,10 +117,10 @@ input {
 
 h5 {
   font-size: 25px;
-  font-weight: 500;
-  color: #193867;
+  font-weight: 700;
+  color: #0800ff;
+  margin-top: 20px;
 }
-
 span {
   font-size: 25px;
   font-weight: 500;
@@ -132,7 +132,7 @@ p {
   font-size: 12px;
   font-weight: 100; /* Memberikan jarak atas antara h5 dan p */
 }
-.btn {
+.container .btn {
   text-align: center;
   width: 120px;
   color: #000;
@@ -141,8 +141,8 @@ p {
   height: 30px;
   align-self: flex-end;
   margin-right: 40px;
-  margin-top: -10px;
-  margin-bottom: 10px;
+  margin-top: -50px;
+  margin-bottom: 20px;
 }
 .card {
   margin-right: 40px;

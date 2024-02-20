@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -209,9 +210,18 @@ app.MapDelete("/maps/{id}", async (int id, FullStackContext db) =>
 
     return Results.NotFound();
 });
-// Endpoint to get all missions
-app.MapGet("/missions", async (FullStackContext db) =>
-    await db.Missions.ToListAsync());
+// Endpoint to get all missions or filtered missions by robot
+app.MapGet("/missions", async (FullStackContext db, [FromQuery] string robot) =>
+{
+    IQueryable<Mission> missions = db.Missions;
+
+    if (!string.IsNullOrEmpty(robot))
+    {
+        missions = missions.Where(m => m.Robot == robot);
+    }
+
+    return await missions.ToListAsync();
+});
 
 // Endpoint to get a single mission by id
 app.MapGet("/missions/{id}", async (int id, FullStackContext db) =>
@@ -257,6 +267,7 @@ app.MapDelete("/missions/{id}", async (int id, FullStackContext db) =>
 
     return Results.NotFound();
 });
+
 // Endpoint to get all paths
 app.MapGet("/paths", async (FullStackContext db) =>
     await db.Paths.ToListAsync());
@@ -311,22 +322,7 @@ app.MapDelete("/paths/{id}", async (int id, FullStackContext db) =>
 app.MapGet("/footprints", async (FullStackContext db) =>
     await db.Footprints.ToListAsync());
 
-// Endpoint to get a single footprint by id
-app.MapGet("/footprints/{id}/image", async (int id, FullStackContext db) =>
-{
-    var footprint = await db.Footprints.FindAsync(id);
 
-    if (footprint == null || string.IsNullOrEmpty(footprint.ImageData))
-    {
-        // Handle case when footprint or image data is not found
-        context.Response.StatusCode = 404; // Not Found
-        return;
-    }
-
-    // Return the image data with the appropriate content type
-    context.Response.ContentType = "image/png";
-    await context.Response.Body.WriteAsync(Convert.FromBase64String(footprint.ImageData));
-});
 
 app.MapGet("/footprints/{id}", async (int id, FullStackContext db) =>
     await db.Footprints.FindAsync(id) is Footprint footprint ? Results.Ok(footprint) : Results.NotFound());
@@ -407,11 +403,60 @@ app.MapDelete("/footprints/{id}", async (int id, FullStackContext db) =>
 
     return Results.NotFound();
 });
+// Endpoint to get all moduls
+app.MapGet("/moduls", async (FullStackContext db) =>
+    await db.Moduls.ToListAsync());
+
+// Endpoint to get a single modul by id
+app.MapGet("/moduls/{id}", async (int id, FullStackContext db) =>
+    await db.Moduls.FindAsync(id) is Modul modul ? Results.Ok(modul) : Results.NotFound());
+
+// Endpoint to create a new modul
+app.MapPost("/moduls", async (Modul modul, FullStackContext db) =>
+{
+    // Add the modul to the database
+    db.Moduls.Add(modul);
+
+    // Save changes to the database
+    await db.SaveChangesAsync();
+
+    // Return the created modul with the appropriate status code and location header
+    return Results.Created($"/moduls/{modul.Id}", modul);
+});
+
+// Endpoint to update a modul
+app.MapPut("/moduls/{id}", async (int id, Modul updatedModul, FullStackContext db) =>
+{
+    var modul = await db.Moduls.FindAsync(id);
+    if (modul is null) return Results.NotFound();
+
+    modul.Name = updatedModul.Name;
+    modul.Date = updatedModul.Date;
+    modul.PortIn = updatedModul.PortIn;
+    modul.PortOut = updatedModul.PortOut;
+
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+// Endpoint to delete a modul
+app.MapDelete("/moduls/{id}", async (int id, FullStackContext db) =>
+{
+    if (await db.Moduls.FindAsync(id) is Modul modul)
+    {
+        db.Moduls.Remove(modul);
+        await db.SaveChangesAsync();
+        return Results.Ok(modul);
+    }
+
+    return Results.NotFound();
+});
+
 
 app.UseCors();
 app.Run();
 
-//Register Table
+
 public class FullStackContext : DbContext
 {
     public DbSet<User> Users { get; set; } //Table User
@@ -420,6 +465,7 @@ public class FullStackContext : DbContext
     public DbSet<Path> Paths { get; set; } //Table User
     public DbSet<Mission> Missions { get; set; } //Table User
     public DbSet<Footprint> Footprints { get; set; } //Table User
+    public DbSet<Modul> Moduls { get; set; } //Table User
     
    
     public FullStackContext(DbContextOptions<FullStackContext> options) : base(options) { }
@@ -473,3 +519,12 @@ public class Footprint
     public string? Robotname { get; set; }
     public byte[]? ImageData { get; set; } // This column will store the binary image data
 }
+public class Modul
+{
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    public string? Date { get; set; }
+    public string? PortIn { get; set; } 
+    public string? PortOut { get; set; }// This column will store the binary image data
+}
+

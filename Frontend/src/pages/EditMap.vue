@@ -5,7 +5,7 @@
       <span>Map</span>
     </h5>
 
-    <router-link to="/Maps" class="btn btn-light"> Back</router-link>
+    <button @click="confirmBack" class="btn btn-light">Back</button>
     <div class="card bg-light">
       <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
@@ -50,7 +50,30 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import axios from "axios";
+import { onMounted, ref } from "vue";
+import router from "../router";
+import Swal from "sweetalert2";
+const confirmBack = async () => {
+  const confirmMessage =
+    "Are you sure you want to go back? Any unsaved changes will be lost.";
+  const confirmed = await Swal.fire({
+    title: "Sure To Go Back?",
+    text: confirmMessage,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+  });
+
+  if (confirmed.isConfirmed) {
+    router.go(-1); // Navigate back one step
+  }
+};
+</script>
 
 <style scoped>
 canvas {
@@ -64,8 +87,9 @@ canvas {
 
 h5 {
   font-size: 25px;
-  font-weight: 500;
-  color: #193867;
+  font-weight: 700;
+  color: #0800ff;
+  margin-top: 20px;
 }
 
 span {

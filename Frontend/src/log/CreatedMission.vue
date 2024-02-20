@@ -11,14 +11,14 @@
         <div class="d-flex">
           <label for="logicDropdown">Logic</label>
           <select id="logicDropdown" v-model="selectedLogic">
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <!-- Add more options as needed -->
+            <option value="IF">If</option>
+            <option value="Else">Else</option>
+            <option value="Timer">Timer</option>
           </select>
         </div>
         <div class="d-flex">
           <label for="pathDropdown">Path</label>
-          <select id="pathDropdown" v-model="selectedPath">
+          <select id="pathDropdown">
             <option value="option1">Option 1</option>
             <option value="option2">Option 2</option>
             <!-- Add more options as needed -->
@@ -26,20 +26,86 @@
         </div>
       </div>
       <div class="card-body">
-        <div class="d-flex align-items-center"></div>
+        <div
+          v-for="(option, index) in selectedOptions"
+          :key="index"
+          class="card option-card"
+        >
+          <!-- Card content for each selected option goes here -->
+          <div class="card-content">
+            {{ option }}
+            <button
+              v-if="option === 'Timer'"
+              class="settings-button"
+              @click="openSettings(index)"
+            >
+              <i class="fa-solid fa-gear"></i>
+            </button>
+            <button class="delete-button" @click="removeCard(index)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
-const selectedLogic = ref(""); // Holds the selected value for Logic dropdown
-const selectedPath = ref(""); // Holds the selected value for Path dropdown
+const selectedLogic = ref("");
+const selectedPath = ref("");
+const selectedOptions = ref([]);
+
+const removeCard = (index) => {
+  selectedOptions.value.splice(index, 1);
+};
+
+const openSettings = (index) => {
+  if (selectedOptions[index] === "Timer") {
+    // Insert a new card with a timer input
+    const timerSettingsCard = {
+      type: "TimerSettings",
+      duration: 0, // default duration in seconds
+    };
+    selectedOptions.splice(index + 1, 0, timerSettingsCard);
+  }
+};
+
+watch([selectedLogic, selectedPath], () => {
+  if (selectedLogic.value !== "") {
+    selectedOptions.value.push(selectedLogic.value);
+  }
+
+  // Add more conditions for additional dropdowns if needed
+});
 </script>
 
 <style scoped>
+.settings-button {
+  margin-left: 10px;
+  border: none;
+  background: none;
+  margin-left: 750px;
+}
+/* Add this style to your component's style block */
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.option-card {
+  margin-bottom: 10px; /* Adjust the margin as needed */
+  padding: 15px; /* Adjust the padding as needed */
+}
 input {
   height: 20px;
   margin-top: -25px;
@@ -53,8 +119,9 @@ input {
 
 h5 {
   font-size: 25px;
-  font-weight: 500;
-  color: #193867;
+  font-weight: 700;
+  color: #0800ff;
+  margin-top: 20px;
 }
 
 span {

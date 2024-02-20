@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header class="navbar navbar-expand-lg bg-white navbar-light">
+    <header class="navbar navbar-expand-lg bg-light">
       <div id="navigation" class="collapse navbar-collapse">
         <ul class="navbar-nav">
           <div class="nav1">
@@ -11,26 +11,30 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <li class="nav-item">
               <button class="play-pause-btn" @click="togglePlayPause">
-                <span class="material-symbols-outlined">
-                  {{ isPlaying ? "pause" : "play_arrow" }}
+                <span
+                  class="fa-solid"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Start/Pause?"
+                >
+                  <i v-if="isPlaying" class="fa-solid fa-pause"></i>
+                  <i v-else class="fa-solid fa-play"></i>
                 </span>
               </button>
             </li>
-            <form class="form-inline my-2 my-lg-0">
-              <div class="scrolling-text-container" v-if="isPlaying">
-                <div class="scrolling-text">{{ scrollingText }}</div>
-              </div>
-              <input
-                class="form-control"
-                type="text"
-                placeholder="…"
-                readonly
-              />
-            </form>
 
-            <li class="nav-item dropdown" id="robot">
+            <select
+              class="form-control form-control-sm"
+              v-model="selectedMission"
+              id="missionSelect"
+            >
+              <option v-for="name in missionOptions" :key="name" :value="name">
+                {{ name }}
+              </option>
+            </select>
+            <div class="dropdown">
               <a
-                class="nav-link dropdown-toggle"
+                class="nav-link"
                 href="#"
                 id="robotDropdown"
                 role="button"
@@ -38,24 +42,31 @@
                 aria-haspopup="true"
                 aria-expanded="false"
               >
-                <span class="material-symbols-outlined">robot</span>
+                <span
+                  class="fa-solid fa-robot"
+                  data-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  title="Select Robot"
+                ></span>
               </a>
-              <div class="dropdown-menu" aria-labelledby="robotDropdown">
-                <!-- Add your robot dropdown content here -->
-                <li
+              <div
+                class="dropdown-menu robot-dropdown-menu"
+                aria-labelledby="robotDropdown"
+              >
+                <a
                   class="dropdown-item"
-                  v-for="name in robotOptions"
-                  :key="name"
-                  :value="name"
+                  v-for="robot in robotOptions"
+                  :key="robot"
+                  @click="selectRobot(robot)"
                 >
-                  {{ name }}
-                </li>
+                  {{ robot }}
+                </a>
               </div>
-            </li>
+            </div>
 
             <li class="nav-item dropdown" id="joystick">
               <a
-                class="nav-link dropdown-toggle"
+                class="nav-link"
                 href="#"
                 id="joystickDropdown"
                 role="button"
@@ -63,36 +74,78 @@
                 aria-haspopup="true"
                 aria-expanded="false"
               >
-                <span class="material-symbols-outlined">joystick</span>
+                <span
+                  class="fa-solid fa-gamepad"
+                  data-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  title="Joystick"
+                ></span>
               </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <!-- Add your joystick dropdown content here -->
-                <div class="joy-stick">
-                  <button class="btn btn-danger">STOP</button>
+              <div
+                class="dropdown-menu"
+                aria-labelledby="joystickDropdown"
+                style="
+                  width: 300px;
+                  margin-right: 100px;
+                  height: 200px;
+                  overflow: auto;
+                "
+              >
+                <div class="controller">
+                  <button @click="move('up')" class="btn up">Up</button>
+                  <div>
+                    <button @click="move('left')" class="btn left">Left</button>
+                    <button @click="move('right')" class="btn right">
+                      Right
+                    </button>
+                  </div>
+                  <button @click="move('down')" class="btn down">Down</button>
+                  <button @click="clickAction" class="btn click">Click</button>
                 </div>
               </div>
             </li>
 
+            <!-- Elemen notifikasi -->
             <li class="nav-item dropdown" id="notif">
               <a
-                class="nav-link dropdown-toggle"
+                class="nav-link notif"
                 href="#"
                 id="notificationsDropdown"
                 role="button"
                 data-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false"
+                @click="markNotificationsAsReadAndRemoveLocalStorage"
               >
-                <span class="material-symbols-outlined">notifications</span>
+                <div class="notification-container">
+                  <span
+                    class="fa-solid fa-bell"
+                    id="notificationIcon"
+                    data-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="Notification"
+                    @click="markNotificationsAsReadAndRemoveLocalStorage"
+                  ></span>
+                  <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
+                  <span
+                    class="notification-dot"
+                    v-if="hasUnreadNotifications"
+                  ></span>
+                </div>
               </a>
               <div
                 class="dropdown-menu"
                 aria-labelledby="notificationsDropdown"
               >
-                <!-- Add your notifications dropdown content here -->
-                <a class="dropdown-item" href="#">Notification 1</a>
-                <a class="dropdown-item" href="#">Notification 2</a>
-                <a class="dropdown-item" href="#">Notification 3</a>
+                <!-- Menampilkan notifikasi dari state Vuex -->
+                <a
+                  v-for="notification in notifications"
+                  :key="notification.id"
+                  class="dropdown-item"
+                  href="#"
+                >
+                  {{ notification }}
+                </a>
               </div>
             </li>
           </div>
@@ -100,18 +153,25 @@
       </div>
     </header>
 
-    <nav :style="{ width: is_expanded ? 'var(--sidebar-width)' : '30px' }">
-      <div class="menu-toggle-wrap">
-        <button class="menu-toggle" @click="toggleMenu">
-          <span class="material-symbols-outlined">
-            {{
-              is_expanded
-                ? "keyboard_double_arrow_left"
-                : "keyboard_double_arrow_right"
-            }}
-          </span>
+    <nav
+      :style="{ width: is_expanded ? 'var(--sidebar-width)' : '30px' }"
+      id="sidenav-5"
+      class="fixed left-15 top-0 z-[1035] h-screen w-60 -translate-x-full overflow-hidden bg-zinc-800 shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0bg-light shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
+      data-te-sidenav-init
+      data-te-sidenav-hidden="false"
+      data-te-sidenav-accordion="true"
+    >
+      <div class="menu-toggle-wrap" style="background-color: #fff">
+        <button @click="toggleMenu">
+          <span
+            :class="[
+              'fa-solid',
+              is_expanded ? 'fa-angles-right' : 'fa-angles-left',
+            ]"
+          ></span>
         </button>
       </div>
+
       <div class="sidebar-content">
         <h2>{{ pageTitle }}</h2>
         <h5 v-if="subMenu.length > 0"></h5>
@@ -132,12 +192,92 @@
 
 <script setup>
 import axios from "axios";
-import { ref, onMounted, watch, toRefs } from "vue";
+import { ref, onMounted, watch, toRefs, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
+const move = (direction) => {
+  console.log(`Move to ${direction}`);
+};
+
+const markNotificationsAsReadAndRemoveLocalStorage = () => {
+  // Mark all notifications as read in Vuex store
+  store.state.notifications.forEach((notification) => {
+    notification.read = true;
+  });
+
+  // Remove the flag indicating unread notifications from local storage
+  localStorage.removeItem("hasUnreadNotifications");
+};
+
+// Menggunakan computed untuk mengecek apakah ada notifikasi yang belum dibaca
+const hasUnreadNotifications = computed(() => {
+  // Check if there are any unread notifications in the list
+  return notifications.value.some((notification) => !notification.read);
+});
+
+const addNotification = (notification) => {
+  // Menambahkan notifikasi ke dalam array notifications
+  store.commit("addNotification", { message: notification, read: false });
+
+  // Set a flag in local storage to indicate that there are unread notifications
+  localStorage.setItem("hasUnreadNotifications", true);
+};
+
+const notifications = computed(() => {
+  return store.state.notifications;
+});
 const router = useRouter();
-const robotOptions = ref([]);
+
+const missionOptions = ref([]);
 const activeSubMenu = ref("");
+const store = useStore();
+const selectedMission = ref(null);
+const selectedRobot = ref(null);
+const robotOptions = ref([]);
+const filteredMissions = ref([]);
+const isDropdownVisible = ref(false);
+const hoveredJoystick = ref(false);
+const hoveredNotif = ref(false);
+
+const selectRobot = async (robotName) => {
+  store.commit("setSelectedRobot", robotName);
+  selectedRobot.value = robotName;
+
+  try {
+    console.log(`Selected Robot: ${robotName}`);
+    await fetchMissions(selectedRobot.value);
+  } catch (error) {
+    console.error(`Error fetching missions for ${robotName}:`, error);
+  }
+};
+
+const fetchMissions = async (robot) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:5258/missions?robot=${robot}`
+    );
+
+    console.log("API Response:", response.data);
+
+    // Ensure that response.data is not undefined before attempting to filter
+    const missions = response.data ?? [];
+
+    console.log(`Missions for ${robot}:`, missions);
+
+    // Filter missions based on the selected robot and exclude missions with ID 0
+    const filteredMissions = missions.filter(
+      (mission) => mission.robot === robot && mission.id !== 0
+    );
+
+    console.log(`Filtered Missions for ${robot}:`, filteredMissions);
+
+    missionOptions.value = filteredMissions.map((mission) => mission.name); // Use the correct property name for mission name
+  } catch (error) {
+    console.error(`Error fetching missions for ${robot}:`, error);
+  }
+};
+
 const fetchRobots = async () => {
   try {
     const response = await axios.get("http://localhost:5258/robots");
@@ -146,6 +286,12 @@ const fetchRobots = async () => {
     console.error("Error fetching robot names:", error);
   }
 };
+
+watch(selectedRobot, () => {
+  console.log("Selected Robot changed, fetching filtered missions...");
+  // You can fetch the filtered missions here or update as needed
+});
+
 const isSubMenuActive = (item) => {
   const routeName = router.currentRoute.value.name;
   const isActive = routeName && routeName.toLowerCase() === item.toLowerCase();
@@ -168,9 +314,13 @@ const toggleMenu = () => {
 };
 
 onMounted(() => {
+  $(document).ready(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
   console.log("Component mounted");
   updatePageTitle();
   fetchRobots();
+  fetchMissions();
 });
 
 const updatePageTitle = () => {
@@ -183,7 +333,7 @@ const updatePageTitle = () => {
     "Modul",
     "User",
   ];
-  // const comonSubMenu = ["Robot", "Add Robot"];
+
   if (routeName === "Dashboard") {
     pageTitle.value = "Dashboard";
     subMenu.value = ["Dashboard"];
@@ -199,7 +349,7 @@ const updatePageTitle = () => {
       subMenu.value = ["Setting"];
     } else if (routeName === "Help") {
       pageTitle.value = "Help";
-      subMenu.value = ["Robot", "Add Robot"];
+      subMenu.value = ["Help", "AddRobot"];
     }
   }
 };
@@ -211,7 +361,6 @@ watch(
   }
 );
 
-const scrollingText = ref("");
 const isPlaying = ref(false);
 
 const togglePlayPause = () => {
@@ -225,19 +374,121 @@ const togglePlayPause = () => {
 </script>
 
 <style lang="scss" scoped>
-.dropdown-menu {
-  margin-left: -40px;
+.robot-dropdown-menu {
+  max-height: 200px; /* Atur ketinggian maksimum dropdown di sini */
+  overflow-y: auto; /* Aktifkan scrolling vertikal */
+  overflow-x: hidden; /* Sembunyikan scrolling horizontal */
 }
-.joy-stick {
+
+/* Styling for dropdown menu items */
+/* Keyframes untuk animasi dropdown */
+@keyframes dropdownAnimation {
+  from {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+/* CSS untuk menampilkan titik biru di atas ikon lonceng (bell) */
+.notification-container {
+  position: relative;
+}
+
+/* CSS untuk menampilkan titik biru di atas ikon lonceng (bell) */
+.notification-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: rgb(0, 255, 51);
+  border-radius: 50%;
+  top: -5px;
+  right: -5px;
+}
+
+.notification-container {
+  position: relative;
+}
+
+/* CSS untuk menampilkan titik biru di atas ikon lonceng (bell) */
+.notification-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: rgb(0, 255, 51);
+  border-radius: 50%;
+  top: -5px;
+  right: -5px;
+}
+
+/* Styling for dropdown menu */
+.dropdown-menu {
+  animation: dropdownAnimation 0.3s ease-out forwards; /* Menggunakan animasi */
+}
+
+/* Untuk mengatur posisi dropdown menu */
+.dropdown-menu.show {
+  transform-origin: top; /* Titik awal transfromasi */
+  top: 100%; /* Menggeser dropdown ke bawah */
+}
+#notif .dropdown-menu {
+  margin-left: -70px;
+}
+.dropdown-menu {
+  margin-left: -55px;
+  box-shadow: 1px 1px 2px #000;
+}
+
+.controller {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: Arial, sans-serif;
+  justify-content: center;
 }
-.joy-stick .btn {
+
+.controller .btn {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.controller .up {
+  background-color: #237ab5;
+  color: #ffffff;
   width: auto;
-  background-color: #ff0000;
-  height: 40px;
+}
+
+.controller .left {
+  background-color: #e74c3c;
+  color: #ffffff;
+  width: auto;
+}
+
+.controller .right {
+  background-color: #2ecc71;
+  color: #ffffff;
+  width: auto;
+}
+
+.controller .down {
+  background-color: #ec9d1e;
+  color: #ffffff;
+  width: auto;
+}
+
+.controller .click {
+  background-color: #9b59b6;
+  color: #ffffff;
+  width: auto;
+}
+
+.form-control {
+  width: 180px;
+  height: 20px;
 }
 button {
   border: hidden;
@@ -247,8 +498,8 @@ input {
   background-color: #d2d2d2;
 }
 #navbarSupportedContent {
-  gap: 40px;
-  margin-left: -200px;
+  gap: 60px;
+  margin-left: 300px;
   margin-top: 10px;
 }
 .submenu-item.active-submenu {
@@ -277,6 +528,11 @@ input {
       bottom: -1px;
     }
   }
+}
+
+.fa-solid {
+  font-size: 18px;
+  color: #000000;
 }
 
 // Tambahkan aturan ini untuk menyimpan garis di atas dan bawah submenu saat submenu aktif
@@ -336,21 +592,20 @@ input {
 .navbar .nav3 .nav-item {
   margin-right: 20px;
 }
-
-.nav1 .nav-item {
+.fa-solid .nav1 .nav-item {
   font-size: 30px;
-  margin-right: 550px;
+  margin-right: 20px;
 }
+
 header {
   margin-top: -10px;
   position: fixed;
   top: 0;
-  left: 60;
+  left: 15;
   width: 100%;
   z-index: 1000;
-
-  padding: 10px; /* Adjust the padding as needed */
-  border-bottom: #000000 solid 1px;
+  padding: 10px;
+  border-bottom: 1px solid #000000; /* Tambahkan garis bawah di sini */
 }
 
 nav {
@@ -383,14 +638,6 @@ nav {
   justify-content: center;
 }
 
-.menu-toggle {
-  background-color: #ffffff;
-  color: #000000;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-}
-
 .is-expanded nav {
   .menu-toggle-wrap {
     top: -3rem;
@@ -401,13 +648,8 @@ nav {
   }
 }
 
-.is-expanded .menu-toggle {
-  background-color: #fff;
-  color: #fffdfd;
-}
-
 button {
-  background-color: #fff;
+  background-color: #f8f8f8;
   margin-top: 1px;
   width: 20px;
   height: 50px;
@@ -420,10 +662,11 @@ h2 {
   margin-top: -20px;
 }
 .navbar-brand {
-  margin-left: 20px;
-  margin-top: 10px;
+  margin-left: 50px;
+  margin-top: 15px;
   font-family: "Poppins", sans-serif;
-  font-weight: 800;
+  font-weight: 700;
+  color: #000000;
 }
 h5 {
   font-size: 14px;
@@ -437,5 +680,8 @@ h5 {
 .submenu-item {
   text-decoration: none;
   color: #000000;
+}
+.menu-toggle-wrap button {
+  background: #ffffff;
 }
 </style>

@@ -10066,11 +10066,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Administrator\\Documents\\MobileRobot\\backend\\Backend.csproj",
+      "projectUniqueName": "C:\\Users\\Administrator\\Documents\\MobileRobot - Copy\\backend\\Backend.csproj",
       "projectName": "Backend",
-      "projectPath": "C:\\Users\\Administrator\\Documents\\MobileRobot\\backend\\Backend.csproj",
+      "projectPath": "C:\\Users\\Administrator\\Documents\\MobileRobot - Copy\\backend\\Backend.csproj",
       "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Administrator\\Documents\\MobileRobot\\backend\\obj\\",
+      "outputPath": "C:\\Users\\Administrator\\Documents\\MobileRobot - Copy\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config"
