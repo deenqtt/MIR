@@ -56,8 +56,8 @@
               <th scope="col">Action</th>
             </tr>
           </thead>
-          <tbody v-if="paths.length > 0">
-            <tr v-for="path in paths" :key="path.id">
+          <tbody v-if="paginatedPaths.length > 0">
+            <tr v-for="(path, index) in paginatedPaths" :key="path.id">
               <td>{{ path.id }}</td>
               <td>{{ path.name }}</td>
               <td>{{ path.start }}</td>
@@ -86,11 +86,39 @@
             </tr>
           </tbody>
         </table>
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <button class="page-link" @click="prevPage">&laquo;</button>
+            </li>
+            <li
+              class="page-item"
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+            >
+              <button class="page-link" @click="changePage(page)">
+                {{ page }}
+              </button>
+            </li>
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === totalPages }"
+            >
+              <button class="page-link" @click="nextPage">&raquo;</button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
     <form class="path" @submit.prevent="submitForm" v-if="showCreateForm">
       <div class="d-flex">
-        <button class="btn btn-success" v-if="!ShowPath" type="submit">
+        <button
+          class="btn btn-success"
+          v-if="!ShowPath"
+          type="submit"
+          @click="submitForm"
+        >
           Save
         </button>
         <button class="btn btn-light" @click="cancelForm">Back</button>
@@ -104,6 +132,7 @@
               class="form-control form-control-sm"
               placeholder="Input Your Path Name"
               v-model="newPath.Name"
+              required
             />
             <label id="select">Select Map</label>
             <select class="form-control form-control-sm" v-model="newPath.Map">
@@ -120,6 +149,7 @@
                 type="text"
                 class="form-control form-control-sm with-button"
                 v-model="newPath.Start"
+                required
               />
               <button
                 type="button"
@@ -136,6 +166,7 @@
                 id="endPoint"
                 type="text"
                 class="form-control form-control-sm with-button"
+                required
               />
               <button
                 type="button"
@@ -151,6 +182,7 @@
               type="text"
               class="form-control form-control-sm"
               v-model="newPath.Distance"
+              required
             />{{ distance }}
           </div>
         </div>
@@ -193,7 +225,7 @@
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
 const showCreateForm = ref(false);
 import Swal from "sweetalert2";
@@ -220,16 +252,6 @@ const isSelectingStart = ref(true);
 const selectedPath = reactive({});
 const submitForm = async () => {
   try {
-    if (
-      !newPath.value.Name ||
-      !newPath.value.Map ||
-      !newPath.value.Start ||
-      !newPath.value.Goal
-    ) {
-      // Show an alert or set an error message indicating that the form is incomplete
-      window.alert("Please fill in all fields.");
-      return;
-    }
     const response = await axios.post(apiUrl, newPath.value);
     console.log(response.data);
 
@@ -249,42 +271,63 @@ const submitForm = async () => {
     await Swal.fire("Success!", "Path successfully created!", "success");
 
     // Redirect to "/path" after success
-    router.push("/path");
+    router.go(-1);
   } catch (error) {
     console.error(error);
     errorMessage.value = "Failed to create map: " + error.message;
   }
 };
 
-const cancelForm = () => {
-  // Reset form and navigate back to the list view
-  newPath.value = {
-    Name: "",
-    Map: "",
-    Start: "",
-    Goal: "",
-    Distance: "",
-  };
-  showCreateForm.value = false;
-
-  // Show confirmation using SweetAlert
-  Swal.fire({
+const cancelForm = async () => {
+  const confirmCancel = await Swal.fire({
     title: "Are you sure?",
-    text: "Changes will not be saved!",
+    text: "Any unsaved changes will be discarded.",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#3085d6",
     cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, cancel!",
-    cancelButtonText: "No, keep it",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Navigate back to the list view if user confirms
-      router.push("/path");
-    }
+    confirmButtonText: "Yes, cancel",
+    cancelButtonText: "No, go back",
   });
+
+  if (confirmCancel.isConfirmed) {
+    newPath.value = {
+      Name: "",
+      Map: "",
+      Start: "",
+      Goal: "",
+      Distance: "",
+    };
+    showCreateForm.value = false;
+  } else {
+    // If user chose not to cancel, do nothing or handle as needed
+  }
 };
 
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const changePage = (page) => {
+  currentPage.value = page;
+};
+const currentPage = ref(1);
+const pageSize = 5; // Jumlah item per halaman
+
+const paginatedPaths = computed(() => {
+  const startIndex = (currentPage.value - 1) * pageSize;
+  return paths.value.slice(startIndex, startIndex + pageSize);
+});
+
+const totalPages = computed(() => Math.ceil(paths.value.length / pageSize));
 // Update detailPath method to set selectedPath
 const detailPath = (path) => {
   selectedPath.name = path.name;
@@ -633,6 +676,11 @@ p {
   margin: 10px;
   border-radius: 10px;
   font-size: 15px;
+}
+.card-header:hover {
+  background: #110d79;
+  transition: 3s ease-in-out linear;
+  color: #fff;
 }
 th {
   font-size: 13px;

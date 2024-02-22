@@ -28,7 +28,13 @@
                 ></path>
               </g>
             </svg>
-            <input placeholder="Search" type="search" class="input" />
+            <input
+              placeholder="Search"
+              type="search"
+              class="input"
+              v-model="searchTerm"
+              @input="fetchDesign"
+            />
           </div>
         </div>
 
@@ -38,12 +44,11 @@
               <th scope="col">#ID</th>
               <th scope="col">Name</th>
               <th scope="col">Robot</th>
-
               <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody v-if="footprints.length > 0">
-            <tr v-for="footprint in footprints" :key="footprint.id">
+            <tr v-for="footprint in paginatedFootprints" :key="footprint.id">
               <td>{{ footprint.id }}</td>
               <td>{{ footprint.name }}</td>
               <td>{{ footprint.robotname }}</td>
@@ -59,6 +64,7 @@
                   </button>
 
                   <br />
+
                   <button
                     id="delete"
                     class="material-symbols-outlined"
@@ -71,45 +77,82 @@
             </tr>
           </tbody>
         </table>
+        <!-- Tombol navigasi halaman -->
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <button class="page-link" @click="prevPage">&laquo;</button>
+            </li>
+            <li
+              class="page-item"
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+            >
+              <button class="page-link" @click="changePage(page)">
+                {{ page }}
+              </button>
+            </li>
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === totalPages }"
+            >
+              <button class="page-link" @click="nextPage">&raquo;</button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
-    <!-- <div class="canvass" v-if="showCreateForm">
-      <div class="color-options">
-        <div
-          v-for="(color, index) in getColorOptions(selectedBoxType)"
-          :key="index"
-          @click="selectColor(color)"
-          :class="{ selected: selectedColor === color }"
-          :style="{ backgroundColor: color }"
-        ></div>
-      </div>
-
-      <div class="preview-section" v-if="selectedColor">
-        <h3>Preview:</h3>
-        <div
-          class="preview-box"
-          :style="{
-            backgroundColor: selectedColor,
-            width: boxWidth,
-            height: boxHeight,
-          }"
-        ></div>
-        <button @click="downloadBox">Download Box</button>
-      </div>
-    </div> -->
   </div>
 </template>
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
 const showCreateForm = ref(false);
 import Swal from "sweetalert2";
+const searchTerm = ref("");
 const footprints = ref([]);
+const robotOptions = ref([]);
 const router = useRouter(); // Initialize the router
 const errorMessage = ref("");
 const apiUrl = "http://localhost:5258/footprints";
+const currentPage = ref(1); // Halaman saat ini
+const pageSize = ref(5); // Jumlah item per halaman
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const changePage = (page) => {
+  currentPage.value = page;
+};
+
+// Menghitung total halaman berdasarkan jumlah item dan ukuran halaman
+const totalPages = computed(() =>
+  Math.ceil(footprints.value.length / pageSize.value)
+);
+
+// Menghitung indeks awal item pada halaman saat ini
+const startIndex = computed(() => (currentPage.value - 1) * pageSize.value);
+
+// Menghitung indeks akhir item pada halaman saat ini
+const endIndex = computed(() =>
+  Math.min(startIndex.value + pageSize.value - 1, footprints.value.length - 1)
+);
+
+// Memotong data misi menjadi halaman-halaman
+const paginatedFootprints = computed(() =>
+  footprints.value.slice(startIndex.value, endIndex.value + 1)
+);
 
 let lines = ref([]);
 
@@ -125,13 +168,16 @@ const cancelForm = () => {
   };
   showCreateForm.value = false;
 };
-const robotOptions = ref([]);
+
 const fetchDesign = async () => {
   try {
     const response = await axios.get(apiUrl);
-    footprints.value = response.data;
+    // Filter data berdasarkan searchTerm
+    footprints.value = response.data.filter((footprint) =>
+      footprint.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+    );
   } catch (error) {
-    errorMessage.value = "Failed to fetch maps: " + error.message;
+    errorMessage.value = "Failed to fetch footprints: " + error.message;
   }
 };
 
@@ -176,96 +222,10 @@ const fetchRobots = async () => {
     console.error("Error fetching robot names:", error);
   }
 };
-// const submitForm = async () => {
-//   if (validateForm()) {
-//     const dataURL = canvas.toDataURL("image/png");
-//     const imageBlob = await fetch(dataURL).then((res) => res.blob());
-
-//     const formData = new FormData();
-//     formData.append("file", imageBlob, "drawn_image.png");
-//     formData.append("name", newFoot.value.Name);
-//     formData.append("robotname", newFoot.value.Robotname);
-
-//     // Log request headers
-//     console.log("Request Headers:", Object.fromEntries(formData.entries()));
-
-//     try {
-//       const response = await axios.post(apiUrl, formData, {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//         },
-//       });
-
-//       console.log("Image uploaded successfully!");
-//       router.push("/footprint"); // Redirect after successful submission
-//     } catch (error) {
-//       console.error("Error uploading image:", error);
-//     }
-//   }
-// };
-
-// const validateForm = () => {
-//   if (
-//     !newFoot.value.Name ||
-//     !newFoot.value.Robotname ||
-//     lines.value.length === 0
-//   ) {
-//     console.error("Please fill in all required fields and draw on the canvas.");
-//     return false;
-//   }
-//   return true;
-// };
-// const boxTypes = {
-//   small: {
-//     width: "50px",
-//     height: "50px",
-//     colors: ["#FF0000", "#00FF00", "#0000FF"],
-//   },
-//   medium: {
-//     width: "100px",
-//     height: "100px",
-//     colors: ["#FFA500", "#008000", "#000080"],
-//   },
-//   large: {
-//     width: "150px",
-//     height: "150px",
-//     colors: ["#800080", "#FFFF00", "#008080"],
-//   },
-// };
-
-// const selectedBoxType = ref("small");
-// const selectedColor = ref(boxTypes[selectedBoxType.value].colors[0]);
-
-// const selectColor = (color) => {
-//   selectedColor.value = color;
-// };
-
-// const getColorOptions = (boxType) => {
-//   return boxTypes[boxType].colors;
-// };
-
-// const boxWidth = ref(boxTypes[selectedBoxType.value].width);
-// const boxHeight = ref(boxTypes[selectedBoxType.value].height);
-
-// // Watch for changes in selectedBoxType and update boxWidth and boxHeight
-// watch(
-//   () => selectedBoxType.value,
-//   () => {
-//     boxWidth.value = boxTypes[selectedBoxType.value].width;
-//     boxHeight.value = boxTypes[selectedBoxType.value].height;
-//   }
-// );
 
 onMounted(() => {
-  // canvas.getContext("2d");
-
-  // drawAxes();
   fetchRobots();
   fetchDesign();
-
-  // canvas.addEventListener("mousedown", startDrawing);
-  // canvas.addEventListener("mouseup", stopDrawing);
-  // canvas.addEventListener("mousemove", draw);
 });
 </script>
 

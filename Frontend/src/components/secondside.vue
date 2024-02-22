@@ -183,7 +183,7 @@
           class="submenu-item"
           :class="{ 'active-submenu': isSubMenuActive(item) }"
         >
-          <h5>{{ item }}</h5>
+          <i :class="`fa ${item.icon}`"></i> {{ item.name }}
         </router-link>
       </div>
     </nav>
@@ -209,7 +209,15 @@ const markNotificationsAsReadAndRemoveLocalStorage = () => {
   // Remove the flag indicating unread notifications from local storage
   localStorage.removeItem("hasUnreadNotifications");
 };
-
+const subMenuItems = ref([
+  { name: "Dashboard", icon: "fa-tachometer-alt" },
+  { name: "Maps", icon: "fa-map" },
+  { name: "Path", icon: "fa-route" },
+  { name: "Mission", icon: "fa-tasks" },
+  { name: "Footprint", icon: "fa-shoe-prints" },
+  { name: "Modul", icon: "fa-cubes" },
+  { name: "User", icon: "fa-user" },
+]);
 // Menggunakan computed untuk mengecek apakah ada notifikasi yang belum dibaca
 const hasUnreadNotifications = computed(() => {
   // Check if there are any unread notifications in the list
@@ -340,17 +348,13 @@ const updatePageTitle = () => {
   } else if (routeName === "Setup" || commonSubMenu.includes(routeName)) {
     pageTitle.value = "Setup";
     subMenu.value = commonSubMenu;
-  } else if (["Monitoring", "System", "Help"].includes(routeName)) {
-    pageTitle.value = routeName;
-    // Menetapkan submenu sesuai dengan menu yang dipilih
-    if (routeName === "Monitoring") {
-      subMenu.value = ["Monitor"];
-    } else if (routeName === "System") {
-      subMenu.value = ["Setting"];
-    } else if (routeName === "Help") {
-      pageTitle.value = "Help";
-      subMenu.value = ["Help", "AddRobot"];
-    }
+  } else if (routeName === "Monitoring") {
+    subMenu.value = ["Monitor"];
+  } else if (routeName === "System") {
+    subMenu.value = ["Settings"];
+  } else if (routeName === "Robot") {
+    pageTitle.value = "Robot";
+    subMenu.value = ["Robot", "AddRobot"];
   }
 };
 
@@ -374,6 +378,10 @@ const togglePlayPause = () => {
 </script>
 
 <style lang="scss" scoped>
+.submenu-item .fa-submenu {
+  margin-right: -10px;
+}
+
 .robot-dropdown-menu {
   max-height: 200px; /* Atur ketinggian maksimum dropdown di sini */
   overflow-y: auto; /* Aktifkan scrolling vertikal */

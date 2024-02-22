@@ -22,12 +22,12 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const showSidebar = computed(() => {
-  const exemptedPages = ["/", "/authentication"];
+  const exemptedPages = ["/auth/login", "/auth/register"];
   return !exemptedPages.includes(router.currentRoute.value.path);
 });
 
 const isExemptedPage = computed(() => {
-  const exemptedPages = ["/", "/authentication"];
+  const exemptedPages = ["/auth/login", "/auth/register"];
   return exemptedPages.includes(router.currentRoute.value.path);
 });
 </script>

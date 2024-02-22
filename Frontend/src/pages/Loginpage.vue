@@ -34,7 +34,7 @@
           <button type="submit" class="btn btn-success">LOGIN</button>
           <p>
             Not Have Account? Please
-            <router-link to="/authentication" class="router"
+            <router-link to="/auth/register" class="router"
               >Register</router-link
             >
           </p>
@@ -49,7 +49,7 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-
+import { saveAuthToken } from "../router/auth";
 const apiUrl = "http://localhost:5258";
 const router = useRouter();
 const login = ref({ username: "", password: "" });
@@ -61,25 +61,23 @@ const togglePasswordVisibility = () => {
 };
 const loginUser = async () => {
   try {
-    // Make a POST request to your backend API for user authentication
     const response = await axios.post(`${apiUrl}/login`, {
       username: login.value.username,
       password: login.value.password,
     });
 
-    const user = response.data; // Assuming the backend sends the user data on successful login
+    const token = response.data.token;
 
-    if (user) {
+    if (token) {
+      saveAuthToken(token);
       console.log("Login successful!");
-      // Redirect to another page or perform additional actions
-      router.push("/dashboard"); // Adjust the route as needed
+      router.push("/dashboard");
     } else {
       errorMessage.value = "Invalid username or password.";
     }
   } catch (error) {
     errorMessage.value = "Invalid username or password.";
     console.error("An error occurred during login:", error);
-    // Handle any network or server-related errors
   }
 };
 </script>

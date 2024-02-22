@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +42,7 @@ using (var scope = app.Services.CreateScope())
 
 //Endpoint User for method Get all data, Get data use ID, Create or add data user, Update data User, Delete data user
 // Endpoint for user login
+// Endpoint for user login
 app.MapPost("/login", async (HttpContext context, FullStackContext db) =>
 {
     var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
@@ -48,18 +53,34 @@ app.MapPost("/login", async (HttpContext context, FullStackContext db) =>
 
     var trimmedUsername = login.Username?.Trim().ToLower();
 
-   var user = await db.Users.FirstOrDefaultAsync(u => u.Username != null && u.Username.Trim().ToLower() == trimmedUsername);
+    var user = await db.Users.FirstOrDefaultAsync(u => u.Username != null && u.Username.Trim().ToLower() == trimmedUsername);
 
+    if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, user.Password))
+    {
+        context.Response.StatusCode = 401; // Unauthorized
+        await context.Response.WriteAsync("Invalid username or password");
+        return;
+    }
 
-if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, user.Password))
-{
-    context.Response.StatusCode = 401; // Unauthorized
-    await context.Response.WriteAsync("Invalid username or password");
-    return;
-}
+    // Generate JWT token
+    var tokenHandler = new JwtSecurityTokenHandler();
+    var key = Encoding.ASCII.GetBytes("your_secret_key_here"); // Change this to your secret key
+    var tokenDescriptor = new SecurityTokenDescriptor
+    {
+        Subject = new ClaimsIdentity(new Claim[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Assuming user has an Id property
+            // You can add more claims as needed
+        }),
+        Expires = DateTime.UtcNow.AddHours(1), // Token expiration time
+        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+    };
+    var token = tokenHandler.CreateToken(tokenDescriptor);
+    var tokenString = tokenHandler.WriteToken(token);
 
-
-    await context.Response.WriteAsync(JsonSerializer.Serialize(user));
+    // Serialize user data and token to send back to the client
+    var responseData = new { user = user, token = tokenString };
+    await context.Response.WriteAsync(JsonSerializer.Serialize(responseData));
 });
 
 // app.MapGet("/users", async (FullStackContext db) =>
@@ -209,8 +230,7 @@ app.MapDelete("/maps/{id}", async (int id, FullStackContext db) =>
     }
 
     return Results.NotFound();
-});
-// Endpoint to get all missions or filtered missions by robot
+});// Endpoint to get all missions or filtered missions by robot
 app.MapGet("/missions", async (FullStackContext db, [FromQuery] string robot) =>
 {
     IQueryable<Mission> missions = db.Missions;
@@ -219,6 +239,14 @@ app.MapGet("/missions", async (FullStackContext db, [FromQuery] string robot) =>
     {
         missions = missions.Where(m => m.Robot == robot);
     }
+
+    return await missions.ToListAsync();
+});
+
+// Endpoint to get all missions regardless of the robot parameter
+app.MapGet("/missions/all", async (FullStackContext db) =>
+{
+    IQueryable<Mission> missions = db.Missions;
 
     return await missions.ToListAsync();
 });

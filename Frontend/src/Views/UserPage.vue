@@ -20,7 +20,13 @@
                 ></path>
               </g>
             </svg>
-            <input placeholder="Search" type="search" class="input" />
+            <input
+              placeholder="Search"
+              type="search"
+              class="input"
+              v-model="searchTerm"
+              @input="fetchUser"
+            />
           </div>
         </div>
         <table class="table table-hover">
@@ -32,19 +38,14 @@
               <th scope="col">Action</th>
             </tr>
           </thead>
-          <tbody v-if="users.length > 0">
-            <tr v-for="user in users" :key="user.id">
+          <tbody v-if="paginatedUsers.length > 0">
+            <tr v-for="user in paginatedUsers" :key="user.id">
               <td>{{ user.id }}</td>
               <td>{{ user.username }}</td>
               <td>{{ user.phone }}</td>
 
               <td colspan="">
                 <div class="d-flex">
-                  <button
-                    id="detail"
-                    class="fa-solid fa-circle-info"
-                    @click="detailPath(user)"
-                  ></button>
                   <button
                     id="edit"
                     class="fa-solid fa-pen-to-square"
@@ -66,6 +67,29 @@
             </tr>
           </tbody>
         </table>
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <button class="page-link" @click="prevPage">&laquo;</button>
+            </li>
+            <li
+              class="page-item"
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+            >
+              <button class="page-link" @click="changePage(page)">
+                {{ page }}
+              </button>
+            </li>
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === totalPages }"
+            >
+              <button class="page-link" @click="nextPage">&raquo;</button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>
@@ -73,22 +97,45 @@
 
 <script setup>
 import axios from "axios";
-import { onMounted } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { ref } from "vue";
-
 import Swal from "sweetalert2";
+
+const searchTerm = ref("");
 const router = useRouter();
 const users = ref([]);
-const errorMessage = ref("");
 const apiUrl = "http://localhost:5258/users";
-const tooltip = ref({
-  show: false,
+const errorMessage = ref("");
+const currentPage = ref(1);
+const pageSize = 5; // Jumlah item per halaman
+
+const paginatedUsers = computed(() => {
+  const startIndex = (currentPage.value - 1) * pageSize;
+  return users.value.slice(startIndex, startIndex + pageSize);
 });
+
+const totalPages = computed(() => Math.ceil(users.value.length / pageSize));
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const changePage = (page) => {
+  currentPage.value = page;
+};
 const fetchUser = async () => {
   try {
     const response = await axios.get(apiUrl);
-    users.value = response.data;
+    users.value = response.data.filter((user) =>
+      user.username.toLowerCase().includes(searchTerm.value.toLowerCase())
+    );
   } catch (error) {
     errorMessage.value = "Failed to fetch users: " + error.message;
   }
@@ -132,10 +179,6 @@ const editUser = (user) => {
 };
 
 onMounted(() => {
-  $(document).ready(function () {
-    $("#element").tooltip("update");
-    $('[data-toggle="tooltip"]').tooltip();
-  });
   fetchUser(); // Fetch all users instead of a specific user
 });
 </script>

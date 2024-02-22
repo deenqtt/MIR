@@ -12,12 +12,16 @@
           class="button"
           :class="{ active: $route.path === '/dashboard' }"
         >
-          <span
-            class="fa-solid fa-house"
+          <lord-icon
+            class="fa-solid"
+            src="https://cdn.lordicon.com/wmwqvixz.json"
+            trigger="hover"
+            colors="primary:#ffffff"
             data-toggle="tooltip"
             data-bs-placement="right"
             title="Dashboard"
-          ></span>
+          >
+          </lord-icon>
         </router-link>
       </div>
       <router-link
@@ -25,12 +29,16 @@
         class="button"
         :class="{ active: $route.path === '/maps' }"
       >
-        <span
-          class="fa-solid fa-sliders"
+        <lord-icon
+          class="fa-solid"
+          src="https://cdn.lordicon.com/omiqopzf.json"
+          trigger="hover"
+          colors="primary:#ffffff"
           data-toggle="tooltip"
           data-bs-placement="right"
           title="Setup"
-        ></span>
+        >
+        </lord-icon>
       </router-link>
       <!-- Sisipkan event mouseenter dan mouseleave untuk menampilkan dan menyembunyikan tooltip -->
       <router-link
@@ -38,27 +46,32 @@
         class="button"
         :class="{ active: $route.path === '/monitoring' }"
       >
-        <span
-          class="fa-solid fa-chart-simple"
+        <lord-icon
+          class="fa-solid"
+          src="https://cdn.lordicon.com/uwinmnkh.json"
+          trigger="hover"
+          colors="primary:#ffffff"
           data-toggle="tooltip"
           data-bs-placement="right"
           title="Monitoring"
-        ></span>
+        >
+        </lord-icon>
       </router-link>
       <router-link
         to="/system"
         class="button"
         :class="{ active: $route.path === '/system' }"
-        v-bind:data-tooltip="'System'"
-        @mouseenter="tooltip.show = true"
-        @mouseleave="tooltip.show = false"
       >
-        <span
-          class="fa-solid fa-gears"
+        <lord-icon
+          src="https://cdn.lordicon.com/ifsxxxte.json"
+          trigger="hover"
+          colors="primary:#ffffff"
+          class="fa-solid"
           data-toggle="tooltip"
           data-bs-placement="right"
           title="System"
-        ></span>
+        >
+        </lord-icon>
       </router-link>
     </div>
 
@@ -66,20 +79,24 @@
 
     <div class="menu">
       <router-link
-        to="/help"
+        to="/Robot"
         class="button"
-        :class="{ active: $route.path === '/help' }"
+        :class="{ active: $route.path === '/Robot' }"
       >
-        <span
-          class="fa-solid fa-circle-question"
+        <lord-icon
+          class="fa-solid"
+          src="https://cdn.lordicon.com/ojnjgkun.json"
+          trigger="hover"
+          colors="primary:#ffffff"
           data-toggle="tooltip"
           data-bs-placement="right"
           title="Help"
-        ></span>
+        >
+        </lord-icon>
       </router-link>
       <button class="tombol" @click="logout">
         <span
-          class="fa-solid fa-right-from-bracket"
+          class="fa-solid fa-right-from-bracket custom-tooltip"
           data-toggle="tooltip"
           data-bs-placement="right"
           title="Logout"
@@ -92,13 +109,10 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { removeAuthToken } from "../router/auth";
 const router = useRouter();
 const is_expanded = ref(false);
 const is_mobile = ref(false);
-// Tambahkan konfigurasi untuk tooltip menggunakan Alpine.js
-const tooltip = ref({
-  show: false,
-});
 
 const checkWindowSize = () => {
   is_mobile.value = window.innerWidth <= 660;
@@ -109,7 +123,10 @@ const ToggleMenu = () => {
 };
 
 const logout = () => {
-  localStorage.setItem("authenticated", false);
+  // Membersihkan status autentikasi dari localStorage menggunakan fungsi dari auth.js
+  removeAuthToken();
+
+  // Mengarahkan pengguna kembali ke halaman login
   router.push({ name: "Login" });
 };
 
@@ -142,6 +159,9 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 1rem 1rem;
   font-size: 1.5rem;
+}
+.custom-tooltip.tooltip-inner {
+  background-color: blue; /* Ubah warna latar belakang menjadi biru */
 }
 
 /* Styling for mobile view */
@@ -177,8 +197,6 @@ aside {
   overflow: hidden;
   min-height: 100vh;
   padding: 1rem;
-
-  transition: 0.2s ease-in-out;
 
   .flex {
     flex: 1 1 0%;

@@ -32,10 +32,12 @@
               type="search"
               class="input"
               v-model="searchTerm"
+              @input="fetchMission"
             />
           </div>
         </div>
         <table class="table table-hover">
+          <!-- Bagian kepala tabel -->
           <thead>
             <tr>
               <th scope="col">#ID</th>
@@ -45,38 +47,73 @@
               <th scope="col">Action</th>
             </tr>
           </thead>
+          <!-- Bagian badan tabel -->
           <tbody>
-            <!-- Use the original missions array if searchTerm is empty -->
-            <tr
-              v-for="mission in searchTerm ? filteredMissions : missions"
-              :key="mission.id"
-            >
+            <!-- Iterasi setiap item misi pada halaman aktif -->
+            <tr v-for="mission in paginatedMissions" :key="mission.id">
               <td>{{ mission.id }}</td>
               <td>{{ mission.name }}</td>
               <td>{{ mission.site }}</td>
               <td>{{ mission.group }}</td>
-              <td colspan="">
-                <div class="d-flex">
-                  <button
-                    id="edit"
-                    class="material-symbols-outlined"
-                    @click="editMission(mission)"
-                  >
-                    edit
-                  </button>
-                  <br />
-                  <button
-                    id="delete"
-                    class="material-symbols-outlined"
-                    @click="deleteMission(mission)"
-                  >
-                    delete
-                  </button>
-                </div>
+              <td>
+                <!-- Tombol edit -->
+                <button
+                  id="edit"
+                  class="lord-icon"
+                  @click="editMission(mission)"
+                >
+                  <lord-icon
+                    class="lord-icon"
+                    src="https://cdn.lordicon.com/fnxnvref.json"
+                    trigger="hover"
+                    colors="primary:#3080e8"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Edit"
+                  ></lord-icon>
+                </button>
+                <!-- Tombol delete -->
+                <button
+                  id="delete"
+                  class="lord-icon"
+                  @click="deleteMission(mission)"
+                >
+                  <lord-icon
+                    class="lord-icon"
+                    src="https://cdn.lordicon.com/skkahier.json"
+                    trigger="hover"
+                    colors="primary:#e83a30"
+                  ></lord-icon>
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
+
+        <!-- Tombol navigasi halaman -->
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <button class="page-link" @click="prevPage">&laquo;</button>
+            </li>
+            <li
+              class="page-item"
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+            >
+              <button class="page-link" @click="changePage(page)">
+                {{ page }}
+              </button>
+            </li>
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === totalPages }"
+            >
+              <button class="page-link" @click="nextPage">&raquo;</button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
     <div class="d-flex button-flex">
@@ -142,22 +179,22 @@
           </select>
         </div>
       </div>
-      <br />
     </form>
   </div>
 </template>
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import Swal from "sweetalert2";
+// import LordIcon from "lord-icon-library";
+
 const showCreateForm = ref(false);
 const missions = ref([]);
 const router = useRouter();
 const searchTerm = ref("");
 const mapOptions = ref([]);
-import Swal from "sweetalert2";
-import store from "../store";
 const robotOptions = ref([]);
 const newMission = ref({
   Name: "",
@@ -166,8 +203,45 @@ const newMission = ref({
   Robot: "",
 });
 const errorMessage = ref("");
-const apiUrl = "http://localhost:5258/missions";
-const filteredMissions = ref([]);
+const apiUrl = "http://localhost:5258/missions/all";
+const apiUrll = "http://localhost:5258/missions";
+
+const currentPage = ref(1); // Halaman saat ini
+const pageSize = ref(5); // Jumlah item per halaman
+
+// Menghitung total halaman berdasarkan jumlah item dan ukuran halaman
+const totalPages = computed(() =>
+  Math.ceil(missions.value.length / pageSize.value)
+);
+
+// Menghitung indeks awal item pada halaman saat ini
+const startIndex = computed(() => (currentPage.value - 1) * pageSize.value);
+
+// Menghitung indeks akhir item pada halaman saat ini
+const endIndex = computed(() =>
+  Math.min(startIndex.value + pageSize.value - 1, missions.value.length - 1)
+);
+
+// Memotong data misi menjadi halaman-halaman
+const paginatedMissions = computed(() =>
+  missions.value.slice(startIndex.value, endIndex.value + 1)
+);
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const changePage = (page) => {
+  currentPage.value = page;
+};
 const editMission = (mission) => {
   // Log the username before navigating to the edit page
   console.log("Editing user:", mission.name);
@@ -180,35 +254,12 @@ const editMission = (mission) => {
 };
 const fetchMission = async () => {
   try {
-    console.log("Fetching missions...");
-
-    // Log URL dan parameter yang dikirim
-    console.log("URL:", apiUrl);
-    console.log("Parameters:", searchTerm.value);
-
-    const response = await axios.get(apiUrl, {
-      params: { robot: searchTerm.value }, // Menambahkan parameter robot jika diperlukan
-    });
-
-    console.log("Response:", response.data);
-
-    missions.value = response.data;
+    const response = await axios.get(apiUrl);
+    missions.value = response.data.filter((mission) =>
+      mission.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+    );
   } catch (error) {
-    console.error("Error fetching missions:", error);
-
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      console.error("Response Status:", error.response.status);
-      console.error("Response Data:", error.response.data);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error("No response received. Request details:", error.request);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error("Error during request setup:", error.message);
-    }
-
-    errorMessage.value = "Failed to fetch missions. See console for details.";
+    errorMessage.value = "Failed to fetch missions: " + error.message;
   }
 };
 
@@ -227,28 +278,14 @@ const deleteMission = async (mission) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      // Hapus pengguna jika pengguna mengkonfirmasi
+      // Hapus misi jika pengguna mengkonfirmasi
       await axios.delete(`${apiUrl}/${mission.id}`);
       fetchMission();
       // Tampilkan pesan sukses menggunakan SweetAlert
-      await Swal.fire("Congratss!", "PMission Has Deleted", "success");
+      await Swal.fire("Congratss!", "Mission Has Deleted", "success");
     } catch (error) {
-      errorMessage.value = "Failed to delete user: " + error.message;
+      errorMessage.value = "Failed to delete mission: " + error.message;
     }
-  }
-};
-
-// Filter missions based on search term
-
-const updateFilteredMissions = () => {
-  if (searchTerm.value.trim() === "") {
-    // If the search term is empty, use the original missions array
-    filteredMissions.value = [...missions.value];
-  } else {
-    // Otherwise, filter based on the search term
-    filteredMissions.value = missions.value.filter((mission) =>
-      mission.group.toLowerCase().includes(searchTerm.value.toLowerCase())
-    );
   }
 };
 
@@ -264,30 +301,21 @@ const submitForm = async () => {
       window.alert("Please fill in all fields.");
       return;
     }
-    const response = await axios.post(apiUrl, newMission.value);
-    console.log(response.data);
-
+    const response = await axios.post(apiUrll, newMission.value);
+    console.log("Success:", response.data); // Log response jika input berhasil
     const missionsResponse = await axios.get(apiUrl);
     missions.value = missionsResponse.data;
-
     // Clear the form fields after successful submission
-    store.commit("addNotification", "Mission  created!");
-    newMission.value = {
-      Name: "",
-      Site: "",
-      Group: "",
-      Robot: "",
-    };
-
-    // Redirect to "/map/created/new"
+    newMission.value = { Name: "", Site: "", Group: "", Robot: "" };
+    await Swal.fire("Success!", "Mission successfully created!", "success");
+    // Redirect to "/Mission/Created/New"
     router.push("/Mission/Created/New");
-
-    window.alert("Path successfully created!");
   } catch (error) {
-    console.error(error);
-    errorMessage.value = "Failed to create map: " + error.message;
+    console.error("Error:", error); // Log error jika terjadi kesalahan
+    errorMessage.value = "Failed to create mission: " + error.message;
   }
 };
+
 const fetchMaps = async () => {
   try {
     const response = await axios.get("http://localhost:5258/maps");
@@ -316,17 +344,29 @@ const cancelForm = () => {
 };
 // Call fetchMissions and updateFilteredMissions on component mount
 onMounted(() => {
+  $(document).ready(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
   fetchMission();
-
   fetchMaps();
   fetchRobots();
 });
 
 // Watch for changes in the searchTerm and update filteredMissions
-watch(searchTerm, updateFilteredMissions);
 </script>
 
 <style scoped>
+.lord-icon {
+  border: none;
+  background: none;
+  color: #0800ff;
+  width: 25px;
+  height: 250x;
+  margin-right: 20px;
+}
+.lord-icon:hover {
+  color: #000000;
+}
 .group {
   display: flex;
   line-height: 28px;

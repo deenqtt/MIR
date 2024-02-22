@@ -45,9 +45,9 @@
               <th scope="col">Action</th>
             </tr>
           </thead>
-          <tbody v-if="maps.length > 0">
-            <tr v-for="map in maps" :key="map.id">
-              <td>{{ index + 1 }}</td>
+          <tbody v-if="paginatedMaps.length > 0">
+            <tr v-for="(map, index) in paginatedMaps" :key="map.id">
+              <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
               <td>{{ map.name }}</td>
 
               <td>{{ map.creator }}</td>
@@ -74,6 +74,29 @@
             </tr>
           </tbody>
         </table>
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <button class="page-link" @click="prevPage">&laquo;</button>
+            </li>
+            <li
+              class="page-item"
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+            >
+              <button class="page-link" @click="changePage(page)">
+                {{ page }}
+              </button>
+            </li>
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === totalPages }"
+            >
+              <button class="page-link" @click="nextPage">&raquo;</button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
 
@@ -134,7 +157,7 @@
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
 import Swal from "sweetalert2";
 import store from "../store";
@@ -150,6 +173,15 @@ const newMap = ref({
 });
 const errorMessage = ref("");
 const apiUrl = "http://localhost:5258/maps";
+const currentPage = ref(1);
+const pageSize = 5; // Jumlah item per halaman
+
+const paginatedMaps = computed(() => {
+  const startIndex = (currentPage.value - 1) * pageSize;
+  return maps.value.slice(startIndex, startIndex + pageSize);
+});
+
+const totalPages = computed(() => Math.ceil(maps.value.length / pageSize));
 
 const cancelForm = async () => {
   const confirmCancel = await Swal.fire({
@@ -275,6 +307,21 @@ const editMaps = (map) => {
     name: "edit-map",
     params: { id: map.id },
   });
+};
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const changePage = (page) => {
+  currentPage.value = page;
 };
 // Call fetchMaps on component mount
 onMounted(() => {
