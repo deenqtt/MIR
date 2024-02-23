@@ -342,7 +342,8 @@ const updatePageTitle = () => {
     subMenu.value = commonSubMenu;
   } else if (routeName === "Monitoring") {
     subMenu.value = ["Monitor"];
-  } else if (routeName === "System") {
+  } else if (routeName === "Settings") {
+    pageTitle.value = "System";
     subMenu.value = ["Settings"];
   } else if (routeName === "Robot") {
     pageTitle.value = "Robot";

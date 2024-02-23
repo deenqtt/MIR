@@ -58,9 +58,9 @@
         </lord-icon>
       </router-link>
       <router-link
-        to="/system"
+        to="/settings"
         class="button"
-        :class="{ active: $route.path === '/system' }"
+        :class="{ active: $route.path === '/settings' }"
       >
         <lord-icon
           src="https://cdn.lordicon.com/ifsxxxte.json"
