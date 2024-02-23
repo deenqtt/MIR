@@ -183,7 +183,7 @@
           class="submenu-item"
           :class="{ 'active-submenu': isSubMenuActive(item) }"
         >
-          <i :class="`fa ${item.icon}`"></i> {{ item.name }}
+          <h5>{{ item }}</h5>
         </router-link>
       </div>
     </nav>
@@ -209,15 +209,7 @@ const markNotificationsAsReadAndRemoveLocalStorage = () => {
   // Remove the flag indicating unread notifications from local storage
   localStorage.removeItem("hasUnreadNotifications");
 };
-const subMenuItems = ref([
-  { name: "Dashboard", icon: "fa-tachometer-alt" },
-  { name: "Maps", icon: "fa-map" },
-  { name: "Path", icon: "fa-route" },
-  { name: "Mission", icon: "fa-tasks" },
-  { name: "Footprint", icon: "fa-shoe-prints" },
-  { name: "Modul", icon: "fa-cubes" },
-  { name: "User", icon: "fa-user" },
-]);
+
 // Menggunakan computed untuk mengecek apakah ada notifikasi yang belum dibaca
 const hasUnreadNotifications = computed(() => {
   // Check if there are any unread notifications in the list
