@@ -75,7 +75,11 @@ const loginUser = async () => {
     const token = response.data.token;
 
     if (token) {
+      // Simpan token ke local storage
+      localStorage.setItem("token", token);
+
       console.log("Login successful!");
+      // Arahkan pengguna ke halaman dashboard
       router.push("/dashboard");
     } else {
       errorMessage.value = "Invalid username or password.";
@@ -167,10 +171,6 @@ h2 {
   border: none;
   cursor: pointer;
   z-index: 5; /* Tambahkan z-index yang lebih tinggi */
-}
-
-.eye-animation {
-  animation: eye-blink 0.5s;
 }
 
 @keyframes eye-blink {
