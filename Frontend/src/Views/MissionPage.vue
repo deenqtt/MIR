@@ -279,7 +279,7 @@ const deleteMission = async (mission) => {
   if (confirmDelete.isConfirmed) {
     try {
       // Hapus misi jika pengguna mengkonfirmasi
-      await axios.delete(`${apiUrl}/${mission.id}`);
+      await axios.delete(`${apiUrll}/${mission.id}`);
       fetchMission();
       // Tampilkan pesan sukses menggunakan SweetAlert
       await Swal.fire("Congratss!", "Mission Has Deleted", "success");

@@ -57,21 +57,17 @@
                 <div class="d-flex">
                   <button
                     id="edit"
-                    class="material-symbols-outlined"
+                    class="fa-solid fa-pen-to-square"
                     @click="editPath(footprint)"
-                  >
-                    edit
-                  </button>
+                  ></button>
 
                   <br />
 
                   <button
                     id="delete"
-                    class="material-symbols-outlined"
+                    class="fa-solid fa-delete-left"
                     @click="deleteDesign(footprint)"
-                  >
-                    delete
-                  </button>
+                  ></button>
                 </div>
               </td>
             </tr>
@@ -277,7 +273,7 @@ input:hover {
   width: 1rem;
   height: 1rem;
 }
-.d-flex .material-symbols-outlined {
+.d-flex .fa-solid {
   border: none;
   background: none;
 }

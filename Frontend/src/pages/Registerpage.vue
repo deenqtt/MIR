@@ -1,56 +1,78 @@
 <template>
   <div class="container">
-    <h2>REGISTER</h2>
+    <div class="register-page">
+      <h2>REGISTER</h2>
+      <img src="../assets/route.png" alt="" class="logo" />
+      <div class="card-body shadow-lg bg-light">
+        <div class="content">
+          <div class="image-container">
+            <!-- Placeholder for image -->
 
-    <div class="card-body shadow-lg bg-light">
-      <form @submit.prevent="createUser">
-        <div class="input">
-          <input
-            class="input__input"
-            placeholder=" "
-            v-model="newUser.username"
-          />
-          <label class="input__label">Username</label>
-        </div>
+            <img src="../assets/Logo.png" alt="Your Image" class="logo-img" />
+          </div>
+          <div class="form-container">
+            <form @submit.prevent="createUser">
+              <div class="input">
+                <input
+                  class="form-control"
+                  placeholder=" "
+                  v-model="newUser.username"
+                />
+                <label class="input__label">Username</label>
+              </div>
+              <br />
+              <div class="input">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  class="form-control"
+                  placeholder=" "
+                  v-model="newUser.password"
+                />
+                <label class="input__label">Password</label>
+                <button
+                  class="toggle-password"
+                  @click.prevent="togglePasswordVisibility"
+                >
+                  <i v-if="showPassword" class="fa-solid fa-eye-slash"></i>
+                  <i v-else class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <br />
+              <div class="input">
+                <input
+                  class="form-control"
+                  placeholder=" "
+                  v-model="newUser.phone"
+                />
+                <label class="input__label">Phone</label>
+              </div>
 
-        <div class="input">
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            class="input__input"
-            placeholder=" "
-            v-model="newUser.password"
-          />
-          <label class="input__label">Password</label>
-          <button
-            class="toggle-password"
-            @click.prevent="togglePasswordVisibility"
-          >
-            <i v-if="showPassword" class="fa-solid fa-eye-slash"></i>
-            <i v-else class="fa-solid fa-eye"></i>
-          </button>
+              <br />
+              <button type="submit" class="btn btn-success">Register</button>
+              <div class="massage">
+                <span v-if="phoneValidationError" class="error-message">{{
+                  phoneValidationError
+                }}</span>
+                <br />
+                <span
+                  >Have an account??
+                  <router-link to="/auth/login" class="router"
+                    >Login</router-link
+                  ></span
+                >
+              </div>
+            </form>
+            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+            <span v-if="passwordValidationError" class="error-message">{{
+              passwordValidationError
+            }}</span>
+          </div>
         </div>
-
-        <div class="input">
-          <input class="input__input" placeholder=" " v-model="newUser.phone" />
-          <label class="input__label">Phone</label>
-        </div>
-        <span v-if="phoneValidationError" class="error-message">{{
-          phoneValidationError
-        }}</span>
-        <br />
-        <button type="submit" class="btn btn-success">Register</button>
-        <span
-          >Have an account??
-          <router-link to="/auth/login" class="span">Login</router-link></span
-        >
-      </form>
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-      <span v-if="passwordValidationError" class="error-message">{{
-        passwordValidationError
-      }}</span>
+      </div>
     </div>
   </div>
 </template>
+
 <script setup>
 import { onMounted, ref, watchEffect } from "vue";
 import axios from "axios";
@@ -144,6 +166,66 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.container {
+  margin-top: -20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Poppins, sans-serif; /* Menyusun item secara vertikal di tengah */
+}
+.register-page {
+  width: 800px;
+  text-align: center; /* Posisikan teks ke tengah */
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column; /* Menjadikan card-body tata letak kolom */
+  align-items: center; /* Menyusun item di tengah */
+  border-radius: 10px;
+}
+
+h2 {
+  margin-top: 10px;
+  font-weight: 800;
+  margin-bottom: 10px; /* Memberi jarak atas */
+  background: linear-gradient(to right, #1c3db5 0%, #330867 100%);
+  background-clip: text;
+  color: transparent;
+}
+
+.content {
+  display: flex;
+}
+
+.image-container {
+  flex: 1;
+  padding: 20px; /* Tambahkan padding agar terlihat lebih baik */
+}
+
+.image-container img {
+  max-width: 100%;
+  height: auto;
+}
+
+.form-container {
+  flex: 1;
+  padding: 20px; /* Tambahkan padding agar terlihat lebih baik */
+}
+
+.input {
+  position: relative;
+  margin-bottom: 20px; /* Tambahkan margin bottom untuk menambahkan ruang antar elemen input */
+}
+
+.form-control:focus + .input__label,
+.form-control:not(:placeholder-shown) + .input__label {
+  transform: translateY(-30px);
+  padding-left: 1rem;
+  font-size: 12px;
+  color: #6c6c6c;
+}
+
 .toggle-password {
   position: absolute;
   top: 50%;
@@ -154,23 +236,103 @@ onMounted(() => {
   cursor: pointer;
   z-index: 5; /* Tambahkan z-index yang lebih tinggi */
 }
-.input {
-  position: relative;
-  font-size: 16px;
-  border-radius: 5px;
+
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 
-.input__input {
-  padding: 25px 10px 15px 10px;
+.btn {
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  height: 35px;
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 4px;
+  width: 248px;
+  margin-top: -20px;
+  margin-left: -40px;
+}
+
+label {
+  font-family: "Poppins", sans-serif;
+  margin: 8px;
+  font-weight: 500;
+}
+.massage {
+  margin-right: 40px;
+}
+p {
+  margin: 10px;
+  margin-left: -80px;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
   color: #000000;
-  background-color: transparent;
+}
+p {
+  margin-left: -35px;
+}
+.router {
+  text-decoration: none;
+  color: #000000;
+}
+
+.router:hover {
+  color: #ff0000;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .login-page {
+    width: 100%; /* Atur lebar sesuai kebutuhan */
+  }
+
+  .image-container,
+  .form-container {
+    padding: 10px; /* Ubah padding untuk tampilan seluler */
+  }
+
+  .content {
+    flex-direction: column; /* Tampilan kolom untuk layar kecil */
+  }
+
+  input,
+  button {
+    width: calc(100% - 20px); /* Ubah lebar input untuk tampilan seluler */
+    margin-bottom: 10px;
+  }
+
+  p {
+    display: none;
+  }
+
+  .error-message {
+    display: block;
+    font-size: 12px;
+    margin-left: 30px;
+  }
+
+  .btn {
+    height: auto;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    margin: 10px;
+  }
+}
+.input {
   position: relative;
-  z-index: 3;
+  margin-bottom: 20px;
+}
+
+.form-control {
+  width: calc(100% - 40px); /* Sesuaikan lebar input */
 }
 
 .input__label {
-  font-family: "Poppins", sans-serif;
-
   display: flex;
   padding-left: 1.5rem;
   padding-bottom: 1rem;
@@ -186,103 +348,34 @@ onMounted(() => {
   font-weight: 300;
   align-items: center;
   letter-spacing: 1px;
-  z-index: 2;
   font-size: inherit;
-}
-
-.input__input:focus + .input__label,
-.input__input:not(:placeholder-shown) + .input__label {
-  transform: translateY(-30px);
-  padding-left: 1rem;
-  font-size: 12px;
+  padding-left: 10px;
+  position: absolute;
+  pointer-events: none;
+  transition: 0.3s;
   color: #6c6c6c;
 }
-.error-message {
-  color: red;
-  margin-top: 10px;
-}
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.logo-img {
+  max-width: 300px; /* Sesuaikan ukuran gambar */
+  max-height: 300px; /* Sesuaikan ukuran gambar */
+  -webkit-filter: drop-shadow(5px 5px 5px #666666);
+  filter: drop-shadow(5px 5px 5px #6e6e6e);
+  transition: transform 0.3s ease; /* Menambahkan efek transisi */
 }
 
-.card-body {
-  color: rgb(0, 0, 0);
-  border-radius: 10px;
-  box-shadow: -10px 4px 21px 1px rgba(0, 0, 0, 0.71);
-  -webkit-box-shadow: -10px 4px 21px 1px rgba(0, 0, 0, 0.71);
-  -moz-box-shadow: -10px 4px 21px 1px rgba(0, 0, 0, 0.71);
+.logo-img:hover {
+  transform: scale(1.1); /* Memperbesar gambar saat hover */
 }
-h2 {
-  font-family: "Poppins", sans-serif;
-  font-weight: 800;
-  margin-bottom: 20px;
-  background: linear-gradient(to right, #1c3db5 0%, #330867 100%);
-  background-clip: text;
-  color: transparent;
-}
-label {
-  font-family: "Poppins", sans-serif;
-  margin: 8px;
-  font-weight: 500;
-}
-input {
-  font-family: "Poppins", sans-serif;
-  width: 300px;
-  height: 30px;
-  margin-bottom: 5px;
-  border-radius: 10px;
-  margin: 10px;
-  color: #000;
-  font-weight: 700;
-}
-.btn {
-  background-color: #fff;
-  color: #000;
-  font-family: "Poppins", sans-serif;
-  height: 30px;
-  font-weight: 600;
-  font-size: 12px;
-  border-radius: 10px;
-  margin: 5px;
-  margin-left: 10px;
-}
-.btn:hover {
-  background-color: #00dd58;
-}
-span {
-  margin: 0;
-  margin-left: 5px;
-  font-family: "Poppins", sans-serif;
-  cursor: pointer;
-  color: #000000;
-}
-.span {
-  color: #000000;
-  margin-left: 5px;
-  text-decoration: none;
-}
-.span:hover {
-  color: #00dd58;
-}
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-  input,
-  button {
-    width: 90%;
-    margin-bottom: 10px;
-  }
-  span {
-    display: none;
-  }
-  .btn {
-    height: auto;
-    padding: 10px;
-    text-align: center;
-    font-size: 14px;
-  }
+.logo {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 50%; /* Letakkan di tengah vertikal */
+  left: 150px; /* Geser ke kiri sejauh 50px */
+  transform: translateY(-50%); /* Geser ke atas sejauh setengah tinggi */
+  z-index: 1; /* Meletakkan di belakang card */
+
+  background-size: cover;
+  border-radius: 50%; /* Membuat bentuk lingkaran */
 }
 </style>

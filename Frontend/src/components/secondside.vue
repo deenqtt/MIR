@@ -70,9 +70,8 @@
                 href="#"
                 id="joystickDropdown"
                 role="button"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
+                :aria-expanded="dropdownOpen ? 'true' : 'false'"
+                @click="toggleDropdownJosytick"
               >
                 <span
                   class="fa-solid fa-gamepad"
@@ -84,6 +83,7 @@
               <div
                 class="dropdown-menu"
                 aria-labelledby="joystickDropdown"
+                :class="{ show: dropdownOpen1 }"
                 style="
                   width: 300px;
                   margin-right: 100px;
@@ -112,10 +112,8 @@
                 href="#"
                 id="notificationsDropdown"
                 role="button"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-                @click="markNotificationsAsReadAndRemoveLocalStorage"
+                :aria-expanded="dropdownOpen ? 'true' : 'false'"
+                @click="toggleDropdown"
               >
                 <div class="notification-container">
                   <span
@@ -124,7 +122,6 @@
                     data-toggle="tooltip"
                     data-bs-placement="bottom"
                     title="Notification"
-                    @click="markNotificationsAsReadAndRemoveLocalStorage"
                   ></span>
                   <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
                   <span
@@ -136,6 +133,7 @@
               <div
                 class="dropdown-menu"
                 aria-labelledby="notificationsDropdown"
+                :class="{ show: dropdownOpen }"
               >
                 <!-- Menampilkan notifikasi dari state Vuex -->
                 <a
@@ -239,7 +237,15 @@ const filteredMissions = ref([]);
 const isDropdownVisible = ref(false);
 const hoveredJoystick = ref(false);
 const hoveredNotif = ref(false);
+const dropdownOpen = ref(false);
+const dropdownOpen1 = ref(false);
+const toggleDropdown = () => {
+  dropdownOpen.value = !dropdownOpen.value;
+};
 
+const toggleDropdownJosytick = () => {
+  dropdownOpen1.value = !dropdownOpen1.value;
+};
 const selectRobot = async (robotName) => {
   store.commit("setSelectedRobot", robotName);
   selectedRobot.value = robotName;

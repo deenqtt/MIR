@@ -125,7 +125,7 @@ const ToggleMenu = () => {
 const logout = () => {
   // Membersihkan status autentikasi dari localStorage menggunakan fungsi dari auth.js
   removeAuthToken();
-
+  window.location.reload();
   // Mengarahkan pengguna kembali ke halaman login
   router.push({ name: "Login" });
 };
