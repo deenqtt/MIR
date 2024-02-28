@@ -504,10 +504,9 @@ const calculateDistance = () => {
 };
 
 const editPath = (path) => {
-  selectedPath = path;
-  $("#pathEditModal").modal("show");
+  // Redirect ke halaman edit dengan ID path yang dipilih
+  router.push({ name: "edit-path", params: { id: path.id } });
 };
-
 onMounted(() => {
   fetchPaths();
   fetchMaps();

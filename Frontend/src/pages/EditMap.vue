@@ -15,13 +15,13 @@
               <button class="material-symbols-outlined">save</button>
               <p>Save All</p>
             </div>
-            <button class="nav-item dropdown" id="robot">
+            <button class="nav-item dropdown" id="forbiddenZoneDropdown">
               <a
                 class="nav-link dropdown-toggle"
                 href="#"
-                id="robotDropdown"
+                id="forbiddenZoneDropdownMenu"
                 role="button"
-                data-toggle="dropdown"
+                data-bs-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false"
               >
@@ -29,11 +29,17 @@
                   emergency_home
                 </button>
               </a>
-              <div class="dropdown-menu" aria-labelledby="robotDropdown">
-                <!-- Add your robot dropdown content here -->
-                <a class="dropdown-item" href="#">Robot 1</a>
-                <a class="dropdown-item" href="#">Robot 2</a>
-                <a class="dropdown-item" href="#">Robot 3</a>
+              <div
+                class="dropdown-menu"
+                aria-labelledby="forbiddenZoneDropdownMenu"
+              >
+                <a class="dropdown-item" href="#" @click="changeIcon('tembok')"
+                  >Tembok</a
+                >
+                <a class="dropdown-item" href="#" @click="changeIcon('kaca')"
+                  >Kaca</a
+                >
+                <!-- Tambahkan opsi lain di sini sesuai kebutuhan -->
               </div>
             </button>
           </div>
@@ -55,6 +61,7 @@ import axios from "axios";
 import { onMounted, ref } from "vue";
 import router from "../router";
 import Swal from "sweetalert2";
+
 const confirmBack = async () => {
   const confirmMessage =
     "Are you sure you want to go back? Any unsaved changes will be lost.";
