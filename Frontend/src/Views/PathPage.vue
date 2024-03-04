@@ -1,7 +1,6 @@
 <template>
   <!-- Container div -->
   <div class="container">
-    <!-- Konten lainnya -->
     <h5>
       Pat
       <span>h</span>
@@ -46,41 +45,47 @@
           </div>
         </div>
         <table class="table table-hover">
-          <thead>
+          <thead class="thead-dark">
             <tr>
               <th scope="col">#ID</th>
               <th scope="col">Name</th>
               <th scope="col">Start</th>
               <th scope="col">Goal</th>
               <th scope="col">Distance</th>
-              <th scope="col">Action</th>
+              <th scope="col" class="text-end">Action</th>
             </tr>
           </thead>
           <tbody v-if="paginatedPaths.length > 0">
             <tr v-for="(path, index) in paginatedPaths" :key="path.id">
-              <td>{{ path.id }}</td>
+              <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
               <td>{{ path.name }}</td>
               <td>{{ path.start }}</td>
               <td>{{ path.goal }}</td>
               <td>{{ path.distance }}</td>
-              <td colspan="">
-                <div class="d-flex">
+              <td colspan="" class="justify-content-end">
+                <div class="d-flex justify-content-end">
                   <button
                     class="fa-solid fa-eye"
                     id="detail"
                     @click="detailPath(path)"
-                  ></button>
+                  >
+                    <span>Details</span>
+                  </button>
                   <button
                     class="fa-solid fa-pen-to-square"
                     id="edit"
                     @click="editPath(path)"
-                  ></button>
+                  >
+                    <span>Edit</span>
+                  </button>
                   <br />
                   <button
                     class="fa-solid fa-eraser"
                     id="delete"
                     @click="deletePath(path)"
-                  ></button>
+                  >
+                    <span>Delete</span>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -362,12 +367,22 @@ const deleteAllPaths = async () => {
     confirmButtonText: "Delete",
   });
 
-  if (confirmDelete) {
+  if (confirmDelete.isConfirmed) {
     try {
-      await axios.delete(apiUrl); // Assuming this will delete all paths, adjust the URL accordingly
-      fetchPath(); // Fetch the updated list of paths after deletion
-      await Swal.fire("Success!", "Path Deleted All.", "success");
+      // Menggunakan axios untuk mengirim permintaan DELETE ke endpoint yang sesuai
+      const response = await axios.delete(
+        "http://localhost:5258/paths/delete-all"
+      );
+
+      // Jika penghapusan berhasil, muat ulang daftar path
+      if (response.status === 200) {
+        fetchPath();
+        await Swal.fire("Success!", "All Paths Deleted.", "success");
+      } else {
+        throw new Error("Failed to delete all paths");
+      }
     } catch (error) {
+      // Tangani kesalahan jika permintaan gagal
       errorMessage.value = "Failed to delete all paths: " + error.message;
     }
   }
@@ -514,6 +529,59 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.btn {
+  display: inline-block;
+  position: relative;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  text-transform: uppercase;
+  vertical-align: middle;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn span {
+  display: inline-block;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn-warning {
+  color: #212529;
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+  border-color: #d39e00;
+}
+
+.btn-danger {
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
 .group {
   display: flex;
   line-height: 28px;
@@ -574,22 +642,40 @@ input:hover {
   color: black;
 }
 #detail {
-  border: none;
-  background-color: transparent;
-  color: #007bff;
-  cursor: pointer;
+  background: #007bff;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+}
+#delete span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 400;
+  margin-right: 10px;
+}
+#edit span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
+#detail span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
 }
 #edit {
-  border: none;
-  background-color: transparent;
-  color: #ffc107;
-  cursor: pointer;
+  background: #fcee50;
+  border-radius: 6px;
+  width: 90px;
 }
 #delete {
-  border: none;
-  background-color: transparent;
-  color: #dc3545;
-  cursor: pointer;
+  background: #ff838f;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
 }
 .canvas {
   width: 100%;

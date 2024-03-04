@@ -37,22 +37,21 @@
         </div>
 
         <table class="table table-hover">
-          <thead class="thead-dark">
+          <thead class="thead-dark justify-content-between">
             <tr>
               <th scope="col">#ID</th>
               <th scope="col">Name</th>
               <th scope="col">Created By</th>
-              <th scope="col">Action</th>
+              <th scope="col" class="text-center">Action</th>
             </tr>
           </thead>
           <tbody v-if="paginatedMaps.length > 0">
             <tr v-for="(map, index) in paginatedMaps" :key="map.id">
               <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
               <td>{{ map.name }}</td>
-
               <td>{{ map.creator }}</td>
-              <td colspan="">
-                <div class="d-flex">
+              <td>
+                <div class="d-flex justify-content-md-center">
                   <button
                     id="edit"
                     class="fa-solid fa-pen-to-square"
@@ -60,8 +59,6 @@
                   >
                     <span>Edit</span>
                   </button>
-
-                  <br />
                   <button
                     id="delete"
                     class="fa-solid fa-delete-left"
@@ -74,6 +71,7 @@
             </tr>
           </tbody>
         </table>
+
         <nav aria-label="Page navigation example">
           <ul class="pagination">
             <li class="page-item" :class="{ disabled: currentPage === 1 }">
@@ -166,23 +164,20 @@ const maps = ref([]);
 const router = useRouter(); // Initialize the router
 const searchTerm = ref("");
 const robotOptions = ref([]);
+const errorMessage = ref("");
+const currentPage = ref(1);
+const apiUrl = "http://localhost:5258/maps";
+const pageSize = 5; // Jumlah item per halaman
+const paginatedMaps = computed(() => {
+  const startIndex = (currentPage.value - 1) * pageSize;
+  return maps.value.slice(startIndex, startIndex + pageSize);
+});
+const totalPages = computed(() => Math.ceil(maps.value.length / pageSize));
 const newMap = ref({
   Name: "",
   SiteName: "",
   Creator: "",
 });
-const errorMessage = ref("");
-const apiUrl = "http://localhost:5258/maps";
-const currentPage = ref(1);
-const pageSize = 5; // Jumlah item per halaman
-
-const paginatedMaps = computed(() => {
-  const startIndex = (currentPage.value - 1) * pageSize;
-  return maps.value.slice(startIndex, startIndex + pageSize);
-});
-
-const totalPages = computed(() => Math.ceil(maps.value.length / pageSize));
-
 const cancelForm = async () => {
   const confirmCancel = await Swal.fire({
     title: "Are you sure?",
@@ -323,6 +318,7 @@ const nextPage = () => {
 const changePage = (page) => {
   currentPage.value = page;
 };
+
 // Call fetchMaps on component mount
 onMounted(() => {
   fetchMap();
@@ -332,6 +328,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.table thead th {
+  padding-right: 20px; /* Menambahkan jarak di sebelah kanan setiap kolom */
+}
+
+.table thead th:last-child {
+  padding-right: 0; /* Menghapus jarak di sebelah kanan kolom terakhir */
+}
+
 .group {
   display: flex;
   line-height: 28px;
@@ -462,6 +466,7 @@ th {
   background: #fcee50;
   border-radius: 6px;
   width: 90px;
+  height: 28px;
 }
 #delete span {
   font-family: "Poppins", sans-serif;

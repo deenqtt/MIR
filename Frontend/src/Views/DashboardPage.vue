@@ -10,7 +10,7 @@
         <div class="card-name">
           <div class="card bg-dark">
             <div class="card-body">
-              <img src="../assets/ai.png" alt="roboticon" />
+              <img src="../assets/image/ai.png" alt="roboticon" />
 
               {{ selectedRobot }}
             </div>
@@ -26,7 +26,11 @@
             <div class="card bg-primary-subtle">
               <!-- Add background to the image container -->
 
-              <img src="../assets/half.png" alt="" class="colorized-image" />
+              <img
+                src="../assets/image/half.png"
+                alt=""
+                class="colorized-image"
+              />
             </div>
           </div>
         </div>
@@ -35,7 +39,7 @@
       <div class="condition">
         <div class="card bg-dark">
           <div class="card-body">
-            <img src="../assets/info.png" alt="info" />
+            <img src="../assets/image/info.png" alt="info" />
             Condition In Mission ?
           </div>
         </div>
@@ -55,16 +59,21 @@
         </div>
       </div>
     </div>
-    <div v-else>
+    <div v-else class="default-content">
       <!-- Show default content when no robot is selected -->
-      <p>Please select a robot...</p>
+      <div class="robot-search-container">
+        <img
+          src="../assets/image/select.png (1).png"
+          alt="Searching for robots..."
+        />
+        <p>Please select a robot</p>
+      </div>
     </div>
   </div>
 </template>
 <script setup>
 import { useStore } from "vuex";
 import { ref, onMounted } from "vue";
-
 const store = useStore();
 const selectedRobot = ref("");
 onMounted(() => {
@@ -79,6 +88,25 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.default-content {
+  display: flex;
+  justify-content: center; /* Untuk mengatur konten secara horizontal di tengah */
+  align-items: center; /* Untuk mengatur konten secara vertikal di tengah */
+  /* Menjadikan div seluruh tinggi halaman */
+}
+
+.robot-search-container {
+  text-align: center; /* Untuk mengatur teks dan gambar berada di tengah secara horizontal */
+}
+
+.robot-search-container img {
+  width: 300px; /* Atur ukuran gambar sesuai kebutuhan */
+  margin-bottom: 20px;
+  background: none;
+  -webkit-filter: drop-shadow(5px 5px 5px #666666);
+  filter: drop-shadow(5px 5px 5px #666666); /* Jarak antara gambar dan teks */
+}
+
 .canvas {
   border: solid 1px #000000;
 }

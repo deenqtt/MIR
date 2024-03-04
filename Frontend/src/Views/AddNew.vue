@@ -5,6 +5,7 @@
         Add
         <span>Robot</span>
       </h5>
+      <!-- form submit  -->
       <form @submit.prevent="submitForm">
         <div class="card bg-light-subtle">
           <div class="card-body">
@@ -66,9 +67,11 @@
 <script setup>
 import axios from "axios";
 import { onMounted, ref } from "vue";
-import Swal from "sweetalert2";
 import { useStore } from "vuex";
-
+import Swal from "sweetalert2";
+const store = useStore(); // Mengakses store Vuex di dalam setup
+const apiUrl = "http://localhost:5258/robots";
+const errorMessage = ref("");
 const robots = ref([]);
 const newRobot = ref({
   Name: "",
@@ -76,10 +79,6 @@ const newRobot = ref({
   Ip: "",
   DomainId: "",
 });
-
-const errorMessage = ref("");
-const apiUrl = "http://localhost:5258/robots";
-const store = useStore(); // Mengakses store Vuex di dalam setup
 
 const fetchRobots = async () => {
   try {
@@ -89,7 +88,7 @@ const fetchRobots = async () => {
     errorMessage.value = "Failed to fetch robots: " + error.message;
   }
 };
-
+//submit
 const submitForm = async () => {
   try {
     const response = await axios.post(apiUrl, newRobot.value);
@@ -115,7 +114,7 @@ const submitForm = async () => {
     errorMessage.value = "Failed to save robot: " + error.message;
   }
 };
-
+//clear form submit
 const clearForm = () => {
   // Kosongkan nilai pada newRobot
   newRobot.value = {
@@ -163,7 +162,6 @@ label {
   margin-top: -10px;
   font-size: 12px;
 }
-
 .card {
   box-shadow: 1px 2px 1px #000;
   border-radius: 10px;

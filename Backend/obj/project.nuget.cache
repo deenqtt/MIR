@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "exbBSzTPhHYiikQTB9CqDp0rN+QTAWeQ6wx5odhcW6LY9zuvFS2GP8wAs/ImcBamWUjWFCv0aU53rc46YFbBcw==",
+  "dgSpecHash": "Jdis+1BFXf+1sDafNyj2G2iHJoGfFRCpRqWKOZFb9YK077EOVlOKZzs7JQQdEdqIvH6rtXc8JSuj0LGcbJQxyw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Documents\\MobileRobot - Copy\\Backend\\Backend.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\MobileRobot - Copy\\backend\\Backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

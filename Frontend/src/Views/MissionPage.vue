@@ -38,53 +38,42 @@
         </div>
         <table class="table table-hover">
           <!-- Bagian kepala tabel -->
-          <thead>
+          <thead class="thead-dark">
             <tr>
               <th scope="col">#ID</th>
               <th scope="col">Name</th>
               <th scope="col">Site</th>
               <th scope="col">Group</th>
-              <th scope="col">Action</th>
+              <th scope="col" class="text-end">Action</th>
             </tr>
           </thead>
           <!-- Bagian badan tabel -->
           <tbody>
             <!-- Iterasi setiap item misi pada halaman aktif -->
-            <tr v-for="mission in paginatedMissions" :key="mission.id">
-              <td>{{ mission.id }}</td>
+            <tr v-for="(mission, index) in paginatedMissions" :key="mission.id">
+              <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
               <td>{{ mission.name }}</td>
               <td>{{ mission.site }}</td>
               <td>{{ mission.group }}</td>
               <td>
                 <!-- Tombol edit -->
-                <button
-                  id="edit"
-                  class="lord-icon"
-                  @click="editMission(mission)"
-                >
-                  <lord-icon
-                    class="lord-icon"
-                    src="https://cdn.lordicon.com/fnxnvref.json"
-                    trigger="hover"
-                    colors="primary:#3080e8"
-                    data-toggle="tooltip"
-                    data-placement="bottom"
-                    title="Edit"
-                  ></lord-icon>
-                </button>
-                <!-- Tombol delete -->
-                <button
-                  id="delete"
-                  class="lord-icon"
-                  @click="deleteMission(mission)"
-                >
-                  <lord-icon
-                    class="lord-icon"
-                    src="https://cdn.lordicon.com/skkahier.json"
-                    trigger="hover"
-                    colors="primary:#e83a30"
-                  ></lord-icon>
-                </button>
+                <div class="d-flex justify-content-end">
+                  <button
+                    id="delete"
+                    class="fa-solid fa-delete-left"
+                    @click="deleteMission(mission)"
+                  >
+                    <span>Delete</span>
+                  </button>
+
+                  <button
+                    id="edit"
+                    class="fa-solid fa-pen-to-square"
+                    @click="editMission(mission)"
+                  >
+                    <span>Edit</span>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -188,7 +177,6 @@ import axios from "axios";
 import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
-// import LordIcon from "lord-icon-library";
 
 const showCreateForm = ref(false);
 const missions = ref([]);
@@ -205,40 +193,32 @@ const newMission = ref({
 const errorMessage = ref("");
 const apiUrl = "http://localhost:5258/missions/all";
 const apiUrll = "http://localhost:5258/missions";
-
 const currentPage = ref(1); // Halaman saat ini
 const pageSize = ref(5); // Jumlah item per halaman
-
 // Menghitung total halaman berdasarkan jumlah item dan ukuran halaman
 const totalPages = computed(() =>
   Math.ceil(missions.value.length / pageSize.value)
 );
-
 // Menghitung indeks awal item pada halaman saat ini
 const startIndex = computed(() => (currentPage.value - 1) * pageSize.value);
-
 // Menghitung indeks akhir item pada halaman saat ini
 const endIndex = computed(() =>
   Math.min(startIndex.value + pageSize.value - 1, missions.value.length - 1)
 );
-
 // Memotong data misi menjadi halaman-halaman
 const paginatedMissions = computed(() =>
   missions.value.slice(startIndex.value, endIndex.value + 1)
 );
-
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
   }
 };
-
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
   }
 };
-
 const changePage = (page) => {
   currentPage.value = page;
 };
@@ -262,7 +242,22 @@ const fetchMission = async () => {
     errorMessage.value = "Failed to fetch missions: " + error.message;
   }
 };
-
+const fetchMaps = async () => {
+  try {
+    const response = await axios.get("http://localhost:5258/maps");
+    mapOptions.value = response.data.map((map) => map.siteName);
+  } catch (error) {
+    console.error("Error fetching site names:", error);
+  }
+};
+const fetchRobots = async () => {
+  try {
+    const response = await axios.get("http://localhost:5258/robots");
+    robotOptions.value = response.data.map((robot) => robot.name);
+  } catch (error) {
+    console.error("Error fetching robot names:", error);
+  }
+};
 const deleteMission = async (mission) => {
   // Gunakan SweetAlert untuk konfirmasi penghapusan
   const confirmDelete = await Swal.fire({
@@ -288,7 +283,6 @@ const deleteMission = async (mission) => {
     }
   }
 };
-
 const submitForm = async () => {
   try {
     if (
@@ -315,23 +309,6 @@ const submitForm = async () => {
     errorMessage.value = "Failed to create mission: " + error.message;
   }
 };
-
-const fetchMaps = async () => {
-  try {
-    const response = await axios.get("http://localhost:5258/maps");
-    mapOptions.value = response.data.map((map) => map.siteName);
-  } catch (error) {
-    console.error("Error fetching site names:", error);
-  }
-};
-const fetchRobots = async () => {
-  try {
-    const response = await axios.get("http://localhost:5258/robots");
-    robotOptions.value = response.data.map((robot) => robot.name);
-  } catch (error) {
-    console.error("Error fetching robot names:", error);
-  }
-};
 const cancelForm = () => {
   // Reset form and navigate back to the list view
   newMission.value = {
@@ -356,17 +333,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.lord-icon {
-  border: none;
-  background: none;
-  color: #0800ff;
-  width: 25px;
-  height: 250x;
-  margin-right: 20px;
-}
-.lord-icon:hover {
-  color: #000000;
-}
 .group {
   display: flex;
   line-height: 28px;
@@ -405,6 +371,13 @@ input:hover {
   background-color: #fff;
   box-shadow: 0 0 0 4px rgba(49, 13, 228, 0.1);
 }
+#edit span,
+#delete span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
 
 .group .icon {
   position: absolute;
@@ -418,13 +391,7 @@ input:hover {
   border: none;
   background: none;
 }
-#delete:hover {
-  color: #ad0000;
-}
 
-#edit:hover {
-  color: #002aff;
-}
 .d-flex {
   align-self: flex-end;
 }
@@ -460,12 +427,11 @@ p {
 }
 .btn {
   text-align: center;
-  width: 120px;
   color: #000;
   font-size: 12px;
   font-weight: 600;
-  height: 30px;
-  align-self: flex-end;
+  height: auto;
+  width: auto;
   margin-right: 40px;
   margin-top: -50px;
   margin-bottom: 20px;
@@ -506,5 +472,37 @@ th {
 }
 .form .select {
   margin-top: 9px;
+}
+.fa-solid {
+  border: none;
+  border-radius: 4px;
+  margin-left: 5px;
+  font-size: 20px;
+}
+#delete span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: -10px;
+}
+#edit span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
+#delete {
+  background: #ff4f4f;
+}
+#edit {
+  background: #ffed29;
+  height: 27px;
+}
+span {
+  font-size: 25px;
+  font-weight: 700;
+  color: #000000;
+  margin-left: -7px;
 }
 </style>

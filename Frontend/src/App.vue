@@ -3,11 +3,7 @@
     <!-- sidebar -->
     <Sidebar v-if="showSidebar" />
     <SecondSide v-if="showSidebar" />
-    <main
-      :style="{
-        background: isExemptedPage ? height : isExemptedPage ? '100%' : 'auto',
-      }"
-    >
+    <main :style="{ background: isExemptedPage ? '100%' : 'auto' }">
       <!-- Content -->
       <router-view />
     </main>
@@ -30,6 +26,8 @@ const isExemptedPage = computed(() => {
   const exemptedPages = ["/auth/login", "/auth/register"];
   return exemptedPages.includes(router.currentRoute.value.path);
 });
+
+const height = ref("auto"); // define the height property
 </script>
 
 <style lang="scss" scoped>

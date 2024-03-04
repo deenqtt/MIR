@@ -4,7 +4,6 @@
       Foot
       <span>prints</span>
     </h5>
-
     <p>Create and Design Your 2D Here</p>
     <div class="d-flex">
       <button
@@ -39,27 +38,32 @@
         </div>
 
         <table class="table table-hover">
-          <thead>
+          <thead class="thead-dark">
             <tr>
               <th scope="col">#ID</th>
               <th scope="col">Name</th>
               <th scope="col">Robot</th>
-              <th scope="col">Action</th>
+              <th scope="col" class="text text-end">Action</th>
             </tr>
           </thead>
           <tbody v-if="footprints.length > 0">
-            <tr v-for="footprint in paginatedFootprints" :key="footprint.id">
-              <td>{{ footprint.id }}</td>
+            <tr
+              v-for="(footprint, index) in paginatedFootprints"
+              :key="footprint.id"
+            >
+              <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
               <td>{{ footprint.name }}</td>
               <td>{{ footprint.robotname }}</td>
 
               <td colspan="">
-                <div class="d-flex">
+                <div class="d-flex justify-content-end">
                   <button
                     id="edit"
                     class="fa-solid fa-pen-to-square"
                     @click="editPath(footprint)"
-                  ></button>
+                  >
+                    <span>Edit</span>
+                  </button>
 
                   <br />
 
@@ -67,7 +71,9 @@
                     id="delete"
                     class="fa-solid fa-delete-left"
                     @click="deleteDesign(footprint)"
-                  ></button>
+                  >
+                    <span>Delete</span>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -106,8 +112,8 @@
 import axios from "axios";
 import { onMounted, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
-const showCreateForm = ref(false);
 import Swal from "sweetalert2";
+const showCreateForm = ref(false);
 const searchTerm = ref("");
 const footprints = ref([]);
 const robotOptions = ref([]);
@@ -226,6 +232,31 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.text {
+  margin-right: -200px !important;
+}
+#delete span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: -10px;
+}
+#edit span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
+#edit {
+  background: #83a4ef;
+  border-radius: 4px;
+}
+#delete {
+  background: #ff6363;
+  border-radius: 4px;
+  margin-left: 20px;
+}
 .group {
   display: flex;
   line-height: 28px;

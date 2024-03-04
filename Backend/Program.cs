@@ -332,6 +332,21 @@ app.MapPut("/paths/{id}", async (int id, Path updatedPath, FullStackContext db) 
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
+// Endpoint to delete all paths
+app.MapDelete("/paths/delete-all", async (FullStackContext db) =>
+{
+    // Ambil semua path dari database
+    var allPaths = await db.Paths.ToListAsync();
+
+    // Hapus setiap path dari database
+    db.Paths.RemoveRange(allPaths);
+
+    // Simpan perubahan ke database
+    await db.SaveChangesAsync();
+
+    // Mengembalikan respons dengan status OK
+    return Results.Ok("All paths deleted successfully");
+});
 
 // Endpoint to delete a path
 app.MapDelete("/paths/{id}", async (int id, FullStackContext db) =>
@@ -479,6 +494,53 @@ app.MapDelete("/moduls/{id}", async (int id, FullStackContext db) =>
 
     return Results.NotFound();
 });
+// Endpoint to get all errors
+app.MapGet("/errors", async (FullStackContext db) =>
+    await db.Errors.ToListAsync());
+
+// Endpoint to get a single error by id
+app.MapGet("/errors/{id}", async (int id, FullStackContext db) =>
+    await db.Errors.FindAsync(id) is Error error ? Results.Ok(error) : Results.NotFound());
+
+// Endpoint to create a new error
+app.MapPost("/errors", async (Error error, FullStackContext db) =>
+{
+    // Add the error to the database
+    db.Errors.Add(error);
+
+    // Save changes to the database
+    await db.SaveChangesAsync();
+
+    // Return the created error with the appropriate status code and location header
+    return Results.Created($"/errors/{error.Id}", error);
+});
+
+// Endpoint to update an error
+app.MapPut("/errors/{id}", async (int id, Error updatedError, FullStackContext db) =>
+{
+    var error = await db.Errors.FindAsync(id);
+    if (error is null) return Results.NotFound();
+
+    error.Robotname = updatedError.Robotname;
+    error.Date = updatedError.Date;
+    error.Explained = updatedError.Explained;
+
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+// Endpoint to delete an error
+app.MapDelete("/errors/{id}", async (int id, FullStackContext db) =>
+{
+    if (await db.Errors.FindAsync(id) is Error error)
+    {
+        db.Errors.Remove(error);
+        await db.SaveChangesAsync();
+        return Results.Ok(error);
+    }
+
+    return Results.NotFound();
+});
 
 
 app.UseCors();
@@ -488,12 +550,13 @@ app.Run();
 public class FullStackContext : DbContext
 {
     public DbSet<User> Users { get; set; } //Table User
-    public DbSet<Robot> Robots { get; set; } //Table User
-    public DbSet<Map> Maps { get; set; } //Table User
-    public DbSet<Path> Paths { get; set; } //Table User
-    public DbSet<Mission> Missions { get; set; } //Table User
-    public DbSet<Footprint> Footprints { get; set; } //Table User
-    public DbSet<Modul> Moduls { get; set; } //Table User
+    public DbSet<Robot> Robots { get; set; } //Table Robot
+    public DbSet<Map> Maps { get; set; } //Table Map
+    public DbSet<Path> Paths { get; set; } //Table Path
+    public DbSet<Mission> Missions { get; set; } //Table Mission
+    public DbSet<Footprint> Footprints { get; set; } //Table Footprnt
+    public DbSet<Modul> Moduls { get; set; } //Table Modul
+    public DbSet<Error> Errors {get; set;}//table error
     
    
     public FullStackContext(DbContextOptions<FullStackContext> options) : base(options) { }
@@ -555,4 +618,13 @@ public class Modul
     public string? PortIn { get; set; } 
     public string? PortOut { get; set; }// This column will store the binary image data
 }
+public class Error
+{
+    public int Id { get; set; }
+    public string? Robotname { get; set; }
+    public string? Date { get; set; }
+    public string? Explained { get; set; } 
+   
+}
+
 

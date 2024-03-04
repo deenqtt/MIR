@@ -7,7 +7,7 @@
         <div class="content">
           <div class="image-container">
             <!-- Tambahkan gambar di sini -->
-            <img src="../assets/Logo.png" alt="Logo" class="logo-img" />
+            <img src="../assets/image/Logo.png" alt="Logo" class="logo-img" />
           </div>
           <form @submit.prevent="loginUser" class="form-container">
             <div class="input">
@@ -162,17 +162,6 @@ h2 {
   color: #6c6c6c;
 }
 
-.toggle-password {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 10px;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 5; /* Tambahkan z-index yang lebih tinggi */
-}
-
 @keyframes eye-blink {
   0% {
     transform: scale(1);
@@ -271,6 +260,20 @@ p {
     margin: 10px;
   }
 }
+
+.logo-img {
+  max-width: 300px; /* Sesuaikan ukuran gambar */
+  max-height: 300px; /* Sesuaikan ukuran gambar */
+  margin-top: -60px;
+  /* Menambahkan efek bayangan */
+  transition: transform 0.3s ease; /* Menambahkan efek transisi */
+  -webkit-filter: drop-shadow(5px 5px 5px #666666);
+  filter: drop-shadow(5px 5px 5px #666666);
+}
+
+.logo-img:hover {
+  transform: scale(1.1); /* Memperbesar gambar saat hover */
+}
 .input {
   position: relative;
   margin-bottom: 20px;
@@ -303,17 +306,15 @@ p {
   transition: 0.3s;
   color: #6c6c6c;
 }
-.logo-img {
-  max-width: 300px; /* Sesuaikan ukuran gambar */
-  max-height: 300px; /* Sesuaikan ukuran gambar */
-  margin-top: -60px;
-  /* Menambahkan efek bayangan */
-  transition: transform 0.3s ease; /* Menambahkan efek transisi */
-  -webkit-filter: drop-shadow(5px 5px 5px #666666);
-  filter: drop-shadow(5px 5px 5px #666666);
-}
 
-.logo-img:hover {
-  transform: scale(1.1); /* Memperbesar gambar saat hover */
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 45px;
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 5; /* Tambahkan z-index yang lebih tinggi */
 }
 </style>

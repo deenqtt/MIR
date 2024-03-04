@@ -42,9 +42,9 @@
       </router-link>
       <!-- Sisipkan event mouseenter dan mouseleave untuk menampilkan dan menyembunyikan tooltip -->
       <router-link
-        to="/monitoring"
+        to="/activity"
         class="button"
-        :class="{ active: $route.path === '/monitoring' }"
+        :class="{ active: $route.path === '/activity' }"
       >
         <lord-icon
           class="fa-solid"
@@ -56,6 +56,8 @@
           title="Monitoring"
         >
         </lord-icon>
+        <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
+        <span class="notification-dot" v-if="hasUnreadNotifications"></span>
       </router-link>
       <router-link
         to="/settings"
@@ -107,21 +109,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { useRouter } from "vue-router";
 import { removeAuthToken } from "../router/auth";
+import { useStore } from "vuex";
+import store from "../store";
 const router = useRouter();
 const is_expanded = ref(false);
 const is_mobile = ref(false);
-
+const hasUnreadNotifications = computed(() => {
+  // Check if there are any unread notifications in the list
+  return notifications.value.some((notification) => !notification.read);
+});
+const notifications = computed(() => {
+  return store.state.notifications;
+});
 const checkWindowSize = () => {
   is_mobile.value = window.innerWidth <= 660;
 };
-
 const ToggleMenu = () => {
   is_expanded.value = !is_expanded.value;
 };
-
 const logout = () => {
   // Membersihkan status autentikasi dari localStorage menggunakan fungsi dari auth.js
   removeAuthToken();
@@ -129,7 +137,6 @@ const logout = () => {
   // Mengarahkan pengguna kembali ke halaman login
   router.push({ name: "Login" });
 };
-
 const onButtonHover = () => {
   console.log("Button hovered");
 };
@@ -149,6 +156,16 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+.notification-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: rgb(0, 30, 255);
+  border-radius: 50%;
+  top: 15px;
+  right: 19px;
+}
+
 .tombol {
   margin-top: 20px;
   margin-left: 2px;
@@ -190,7 +207,6 @@ onBeforeUnmount(() => {
 aside {
   display: flex;
   flex-direction: column;
-
   background-color: #000000;
 
   width: calc(2rem + 32px);

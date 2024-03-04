@@ -249,23 +249,16 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-const moduls = ref([]);
 import Swal from "sweetalert2";
 import store from "../store";
+const moduls = ref([]);
 const isConnected = ref(false);
 const router = useRouter();
 const successMessage = ref("");
 const errorMessage = ref("");
-
 const apiUrl = "http://localhost:5258/moduls";
 const inputPorts = ["Port 1", "Port 2", "Port 3", "Port 4"];
 const outputPorts = ["Port A", "Port B", "Port C", "Port D"];
-const newConnection = ref({
-  name: "",
-  date: "",
-  portIn: "",
-  portOut: "",
-});
 const showForm = ref(false); // Status tampilan form koneksi baru
 const showEditForm = ref(false); // Status tampilan form edit koneksi
 const editedConnection = ref({}); // Data koneksi yang sedang diedit
@@ -285,7 +278,12 @@ const outputButtonColors = ref(
     "red",
   ]
 );
-
+const newConnection = ref({
+  name: "",
+  date: "",
+  portIn: "",
+  portOut: "",
+});
 const toggleInputButtonColor = (index) => {
   inputButtonColors.value[index] =
     inputButtonColors.value[index] === "green" ? "red" : "green";

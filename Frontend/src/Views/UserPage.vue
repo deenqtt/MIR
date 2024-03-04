@@ -30,27 +30,29 @@
           </div>
         </div>
         <table class="table table-hover">
-          <thead>
+          <thead class="thead-dark text-white">
             <tr>
               <th scope="col">#ID</th>
               <th scope="col">Name</th>
               <th scope="col">No Whatsapp</th>
-              <th scope="col">Action</th>
+              <th scope="col" class="text-end">Action</th>
             </tr>
           </thead>
           <tbody v-if="paginatedUsers.length > 0">
-            <tr v-for="user in paginatedUsers" :key="user.id">
-              <td>{{ user.id }}</td>
+            <tr v-for="(user, index) in paginatedUsers" :key="user.id">
+              <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
               <td>{{ user.username }}</td>
               <td>{{ user.phone }}</td>
 
               <td colspan="">
-                <div class="d-flex">
+                <div class="d-flex justify-content-end">
                   <button
                     id="edit"
                     class="fa-solid fa-pen-to-square"
                     @click="editUser(user)"
-                  ></button>
+                  >
+                    <span>Edit</span>
+                  </button>
 
                   <br />
 
@@ -61,7 +63,9 @@
                     data-bs-placement="right"
                     title="Delete"
                     @click="deleteUser(user)"
-                  ></button>
+                  >
+                    <span>Delete</span>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -184,6 +188,20 @@ onMounted(() => {
 </script>
 
 <style scoped>
+#edit span {
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #000;
+}
+#delete span {
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
 .group {
   display: flex;
   line-height: 28px;
@@ -232,14 +250,20 @@ input:hover {
   height: 1rem;
 }
 #delete {
-  color: #e00707;
+  color: #000;
+  background: #ff6060;
+  width: auto;
+  height: auto;
+  border-radius: 4px;
 }
 #edit {
-  color: #2032ff;
+  color: #000000;
+  background: #2f8ac3;
+  width: auto;
+  height: 25px;
+  border-radius: 4px;
 }
-#detail {
-  color: #00751f;
-}
+
 .d-flex .fa-solid {
   border: none;
   background: none;

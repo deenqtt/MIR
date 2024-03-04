@@ -154,7 +154,6 @@
     <nav
       :style="{ width: is_expanded ? 'var(--sidebar-width)' : '30px' }"
       id="sidenav-5"
-      class="fixed left-15 top-0 z-[1035] h-screen w-60 -translate-x-full overflow-hidden bg-zinc-800 shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0bg-light shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
       data-te-sidenav-init
       data-te-sidenav-hidden="false"
       data-te-sidenav-accordion="true"
@@ -190,43 +189,9 @@
 
 <script setup>
 import axios from "axios";
-import { ref, onMounted, watch, toRefs, computed } from "vue";
+import { ref, onMounted, watch, toRefs, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-
-const move = (direction) => {
-  console.log(`Move to ${direction}`);
-};
-
-const markNotificationsAsReadAndRemoveLocalStorage = () => {
-  // Mark all notifications as read in Vuex store
-  store.state.notifications.forEach((notification) => {
-    notification.read = true;
-  });
-
-  // Remove the flag indicating unread notifications from local storage
-  localStorage.removeItem("hasUnreadNotifications");
-};
-
-// Menggunakan computed untuk mengecek apakah ada notifikasi yang belum dibaca
-const hasUnreadNotifications = computed(() => {
-  // Check if there are any unread notifications in the list
-  return notifications.value.some((notification) => !notification.read);
-});
-
-const addNotification = (notification) => {
-  // Menambahkan notifikasi ke dalam array notifications
-  store.commit("addNotification", { message: notification, read: false });
-
-  // Set a flag in local storage to indicate that there are unread notifications
-  localStorage.setItem("hasUnreadNotifications", true);
-};
-
-const notifications = computed(() => {
-  return store.state.notifications;
-});
-const router = useRouter();
-
 const missionOptions = ref([]);
 const activeSubMenu = ref("");
 const store = useStore();
@@ -239,6 +204,36 @@ const hoveredJoystick = ref(false);
 const hoveredNotif = ref(false);
 const dropdownOpen = ref(false);
 const dropdownOpen1 = ref(false);
+
+const move = (direction) => {
+  console.log(`Move to ${direction}`);
+};
+const markNotificationsAsReadAndRemoveLocalStorage = () => {
+  // Mark all notifications as read in Vuex store
+  store.state.notifications.forEach((notification) => {
+    notification.read = true;
+  });
+
+  // Remove the flag indicating unread notifications from local storage
+  localStorage.removeItem("hasUnreadNotifications");
+};
+// Menggunakan computed untuk mengecek apakah ada notifikasi yang belum dibaca
+const hasUnreadNotifications = computed(() => {
+  // Check if there are any unread notifications in the list
+  return notifications.value.some((notification) => !notification.read);
+});
+const addNotification = (notification) => {
+  // Menambahkan notifikasi ke dalam array notifications
+  store.commit("addNotification", { message: notification, read: false });
+
+  // Set a flag in local storage to indicate that there are unread notifications
+  localStorage.setItem("hasUnreadNotifications", true);
+};
+const notifications = computed(() => {
+  return store.state.notifications;
+});
+const router = useRouter();
+
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value;
 };
@@ -308,30 +303,24 @@ const isSubMenuActive = (item) => {
   return isActive;
 };
 
-const { is_expanded, pageTitle, subMenu } = toRefs({
-  is_expanded: ref(localStorage.getItem("is_expanded") === "true"),
-  pageTitle: ref(""),
-  subMenu: ref([]),
+// Deklarasi state
+const state = reactive({
+  is_expanded: localStorage.getItem("is_expanded") === "true",
+  pageTitle: "",
+  subMenu: [],
 });
 
+// Mendapatkan referensi ke variabel dari state
+const { is_expanded, pageTitle, subMenu } = toRefs(state);
 const toggleMenu = () => {
   is_expanded.value = !is_expanded.value;
   localStorage.setItem("is_expanded", is_expanded.value);
 };
 
-onMounted(() => {
-  $(document).ready(function () {
-    $('[data-toggle="tooltip"]').tooltip();
-  });
-  console.log("Component mounted");
-  updatePageTitle();
-  fetchRobots();
-  fetchMissions();
-});
-
 const updatePageTitle = () => {
   const routeName = router.currentRoute.value.name;
   const commonSubMenu = [
+    "Add Robot",
     "Maps",
     "Path",
     "Mission",
@@ -346,14 +335,15 @@ const updatePageTitle = () => {
   } else if (routeName === "Setup" || commonSubMenu.includes(routeName)) {
     pageTitle.value = "Setup";
     subMenu.value = commonSubMenu;
-  } else if (routeName === "Monitoring") {
-    subMenu.value = ["Monitor"];
+  } else if (routeName === "Activity") {
+    pageTitle.value = "Monitoring";
+    subMenu.value = ["Activity", "Error Log"];
   } else if (routeName === "Settings") {
     pageTitle.value = "System";
-    subMenu.value = ["Settings"];
+    subMenu.value = ["Settings", "Error"];
   } else if (routeName === "Robot") {
     pageTitle.value = "Robot";
-    subMenu.value = ["Robot", "AddRobot"];
+    subMenu.value = ["Robot"];
   }
 };
 
@@ -374,6 +364,15 @@ const togglePlayPause = () => {
     stopScrolling();
   }
 };
+onMounted(() => {
+  $(document).ready(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+  console.log("Component mounted");
+  updatePageTitle();
+  fetchRobots();
+  fetchMissions();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -623,8 +622,7 @@ nav {
   overflow: hidden;
   padding: 1rem;
   width: var(--sidebar-width);
-  z-index: 999; /* Set a high z-index to ensure it appears above other content */
-
+  z-index: 899;
   .menu-toggle-wrap {
     margin-left: -50px;
     display: flex;

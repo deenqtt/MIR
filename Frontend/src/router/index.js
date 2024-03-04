@@ -4,7 +4,7 @@ import Register from "../pages/Registerpage.vue";
 import Loginform from "../pages/Loginpage.vue";
 import Dashboard from "../Views/DashboardPage.vue";
 import Maps from "../Views/MapsPage.vue";
-import Monitoring from "../Views/MonitoringPage.vue";
+import Activity from "../Views/ActivityPage.vue";
 import System from "../Views/SystemPage.vue";
 import Robot from "../Views/RobotPage.vue";
 import Path from "../Views/PathPage.vue";
@@ -14,6 +14,8 @@ import Footprint from "../Views/FootprintPage.vue";
 import Mission from "../Views/MissionPage.vue";
 import AddRobot from "../Views/AddNew.vue";
 import Settings from "../Views/SettingsPage.vue";
+import ErrorLog from "../Views/Errorpage.vue";
+import Error from "../Views/adderror.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -48,9 +50,24 @@ const router = createRouter({
       component: Path,
     },
     {
-      path: "/Monitoring",
-      name: "Monitoring",
-      component: Monitoring,
+      path: "/Activity",
+      name: "Activity",
+      component: Activity,
+    },
+    {
+      path: "/Error Log",
+      name: "Error Log",
+      component: ErrorLog,
+    },
+    {
+      path: "/Error",
+      name: "Error",
+      component: Error,
+    },
+    {
+      path: "/Add Robot",
+      name: "Add Robot",
+      component: AddRobot,
     },
     {
       path: "/System",
@@ -82,11 +99,7 @@ const router = createRouter({
       name: "Footprint",
       component: Footprint,
     },
-    {
-      path: "/addrobot",
-      name: "AddRobot",
-      component: AddRobot,
-    },
+
     {
       path: "/settings",
       name: "Settings",
