@@ -88,12 +88,14 @@ const onSubmit = async () => {
     ) {
       // Show an alert or set an error message indicating that the form is incomplete
       await Swal.fire("Please fill all fields", "", "warning");
-      store.commit("addNotification");
       return;
     }
 
     const response = await axios.post(apiUrl, newError.value);
     console.log(response.data);
+
+    // Menambah notifikasi ke store Vuex setelah berhasil mengirim input
+    store.commit("addNotification", { message: "Error Successfully Sent!" });
 
     await Swal.fire("Success!", "Error Successfully Sent!", "success");
 

@@ -392,6 +392,7 @@ thead {
   font-size: 14px;
 }
 .container {
+  width: 100%;
   font-family: "Poppins", sans-serif;
   display: flex;
   flex-direction: column; /* Mengatur tata letak elemen dalam satu kolom */

@@ -45,6 +45,7 @@
         to="/activity"
         class="button"
         :class="{ active: $route.path === '/activity' }"
+        @click="handleNotificationClick"
       >
         <lord-icon
           class="fa-solid"
@@ -118,12 +119,15 @@ const router = useRouter();
 const is_expanded = ref(false);
 const is_mobile = ref(false);
 const hasUnreadNotifications = computed(() => {
-  // Check if there are any unread notifications in the list
-  return notifications.value.some((notification) => !notification.read);
+  // Ambil nilai properti unreadNotifications dari store
+  const unreadNotifications = store.state.unreadNotifications;
+  // Tentukan apakah ada notifikasi yang belum dibaca
+  return unreadNotifications > 0;
 });
-const notifications = computed(() => {
-  return store.state.notifications;
-});
+const handleNotificationClick = () => {
+  // Mengosongkan jumlah notifikasi yang belum dibaca saat ikon diklik
+  store.commit("markAllNotificationsAsRead");
+};
 const checkWindowSize = () => {
   is_mobile.value = window.innerWidth <= 660;
 };
@@ -189,7 +193,8 @@ onBeforeUnmount(() => {
   overflow-y: auto;
 
   .menu {
-    display: none;
+    position: fixed;
+
     flex-direction: column;
   }
 
