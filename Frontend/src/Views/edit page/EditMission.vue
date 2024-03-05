@@ -66,7 +66,7 @@
 import axios from "axios";
 import { ref, watch, onMounted } from "vue";
 import Swal from "sweetalert2";
-import router from "../router";
+import router from "../../router";
 const selectedLogic = ref("");
 const selectedPath = ref("");
 const selectedOptions = ref([]);

@@ -53,7 +53,7 @@
           </form>
           <div class="image-container">
             <img
-              src="../assets/image/tetx.png"
+              src="../image/tetx.png"
               alt="Error Image"
               class="error-image"
             />

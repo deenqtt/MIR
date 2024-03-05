@@ -2,17 +2,13 @@
   <div class="container">
     <div class="register-page">
       <h2>REGISTER</h2>
-      <img src="../assets/image/route.png" alt="" class="logo" />
+      <img src="../image/route.png" alt="" class="logo" />
       <div class="card-body shadow-lg bg-light">
         <div class="content">
           <div class="image-container">
             <!-- Placeholder for image -->
 
-            <img
-              src="../assets/image/Logo.png"
-              alt="Your Image"
-              class="logo-img"
-            />
+            <img src="../image/Logo.png" alt="Your Image" class="logo-img" />
           </div>
           <div class="form-container">
             <form @submit.prevent="createUser">

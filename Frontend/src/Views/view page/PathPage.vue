@@ -234,7 +234,7 @@ import { onMounted, ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
 const showCreateForm = ref(false);
 import Swal from "sweetalert2";
-import store from "../store";
+import store from "../../store";
 const searchTerm = ref("");
 const paths = ref([]);
 const router = useRouter(); // Initialize the router

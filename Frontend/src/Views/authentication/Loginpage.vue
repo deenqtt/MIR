@@ -7,7 +7,7 @@
         <div class="content">
           <div class="image-container">
             <!-- Tambahkan gambar di sini -->
-            <img src="../assets/image/Logo.png" alt="Logo" class="logo-img" />
+            <img src="../image/Logo.png" alt="Logo" class="logo-img" />
           </div>
           <form @submit.prevent="loginUser" class="form-container">
             <div class="input">

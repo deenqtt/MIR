@@ -59,7 +59,7 @@
 <script setup>
 import axios from "axios";
 import { onMounted, ref } from "vue";
-import router from "../router";
+import router from "../../router";
 import Swal from "sweetalert2";
 
 const confirmBack = async () => {

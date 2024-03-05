@@ -69,7 +69,7 @@ import { onMounted, ref, reactive } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
 import Swal from "sweetalert2";
 
-import router from "../router";
+import router from "../../router";
 const canvas = ref(null);
 const ctx = ref(null);
 const startPoint = ref(null);

@@ -158,7 +158,7 @@ import axios from "axios";
 import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
 import Swal from "sweetalert2";
-import store from "../store";
+import store from "../../store";
 const showCreateForm = ref(false);
 const maps = ref([]);
 const router = useRouter(); // Initialize the router

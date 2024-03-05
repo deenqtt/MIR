@@ -10,7 +10,7 @@
         <div class="card-name">
           <div class="card bg-dark">
             <div class="card-body">
-              <img src="../assets/image/ai.png" alt="roboticon" />
+              <img src="../image/ai.png" alt="roboticon" />
 
               {{ selectedRobot }}
             </div>
@@ -26,11 +26,7 @@
             <div class="card bg-primary-subtle">
               <!-- Add background to the image container -->
 
-              <img
-                src="../assets/image/half.png"
-                alt=""
-                class="colorized-image"
-              />
+              <img src="../image/half.png" alt="" class="colorized-image" />
             </div>
           </div>
         </div>
@@ -39,7 +35,7 @@
       <div class="condition">
         <div class="card bg-dark">
           <div class="card-body">
-            <img src="../assets/image/info.png" alt="info" />
+            <img src="../image/info.png" alt="info" />
             Condition In Mission ?
           </div>
         </div>
@@ -62,10 +58,7 @@
     <div v-else class="default-content">
       <!-- Show default content when no robot is selected -->
       <div class="robot-search-container">
-        <img
-          src="../assets/image/select.png (1).png"
-          alt="Searching for robots..."
-        />
+        <img src="../image/select.png (1).png" alt="Searching for robots..." />
         <p>Please select a robot</p>
       </div>
     </div>

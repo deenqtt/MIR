@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="heading">
-      <h5>Monitoring<span class="span">ing</span></h5>
+      <h5>Monitor<span class="span">ing</span></h5>
       <div class="dropdown">
         <button
           class="btn dropdown-toggle"
@@ -60,7 +60,7 @@
     <div class="centered-content" v-if="!selectedRobots.length">
       <img
         class="robot-image"
-        src="../assets/image/roboterror.png"
+        src="../image/roboterror.png"
         alt="Robot Image"
       />
       <h5 class="message">Please select a robot to see activities</h5>
@@ -180,6 +180,8 @@ onMounted(() => {
 }
 
 .message {
+  color: #000;
+  font-weight: 300;
   font-size: 20px;
   font-family: "Poppins", sans-serif;
 }

@@ -1,21 +1,21 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { isAuthenticated } from "./auth";
-import Register from "../pages/Registerpage.vue";
-import Loginform from "../pages/Loginpage.vue";
-import Dashboard from "../Views/DashboardPage.vue";
-import Maps from "../Views/MapsPage.vue";
-import Activity from "../Views/ActivityPage.vue";
-import System from "../Views/SystemPage.vue";
-import Robot from "../Views/RobotPage.vue";
-import Path from "../Views/PathPage.vue";
-import User from "../Views/UserPage.vue";
-import Modul from "../Views/IOModulPage.vue";
-import Footprint from "../Views/FootprintPage.vue";
-import Mission from "../Views/MissionPage.vue";
-import AddRobot from "../Views/AddNew.vue";
-import Settings from "../Views/SettingsPage.vue";
-import ErrorLog from "../Views/Errorpage.vue";
-import Error from "../Views/adderror.vue";
+import Register from "../Views/authentication/Registerpage.vue";
+import Loginform from "../Views/authentication/Loginpage.vue";
+import Dashboard from "../Views/view page/DashboardPage.vue";
+import Maps from "../Views/view page/MapsPage.vue";
+import Activity from "../Views/view page/ActivityPage.vue";
+import System from "../Views/view page/SystemPage.vue";
+import Robot from "../Views/view page/RobotPage.vue";
+import Path from "../Views/view page/PathPage.vue";
+import User from "../Views/view page/UserPage.vue";
+import Modul from "../Views/view page/IOModulPage.vue";
+import Footprint from "../Views/view page/FootprintPage.vue";
+import Mission from "../Views/view page/MissionPage.vue";
+import AddRobot from "../Views/view page/AddNew.vue";
+import Settings from "../Views/view page/SettingsPage.vue";
+import ErrorLog from "../Views/view page/Errorpage.vue";
+import Error from "../Views/view page/adderror.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -108,56 +108,56 @@ const router = createRouter({
     {
       path: "/Maps/Created/New",
       Name: "New",
-      component: () => import("../log/createdMaps.vue"),
+      component: () => import("../Views/created page/createdMaps.vue"),
     },
     {
       path: "/test",
       Name: "tet",
-      component: () => import("../components/test.vue"),
+      component: () => import("../Views/test/test.vue"),
     },
     {
       path: "/Mission/Created/New",
       Name: "Miss",
-      component: () => import("../log/CreatedMission.vue"),
+      component: () => import("../Views/created page/CreatedMission.vue"),
     },
     {
       path: "/edit-path/:id",
       name: "edit-path",
-      component: () => import("../pages/EditPath.vue"),
+      component: () => import("../Views/edit page/EditPath.vue"),
       props: true,
     },
     {
       path: "/edit-mission/:id",
       name: "edit-mission",
-      component: () => import("../pages/EditMission.vue"),
+      component: () => import("../Views/edit page/EditMission.vue"),
       props: true,
     },
     {
       path: "/edit-map/:id",
       name: "edit-map",
-      component: () => import("../pages/EditMap.vue"),
+      component: () => import("../Views/edit page/EditMap.vue"),
       props: true,
     },
     {
       path: "/edit-user/:id",
       name: "edit-user",
-      component: () => import("../pages/EditUser.vue"),
+      component: () => import("../Views/edit page/EditUser.vue"),
       props: true,
     },
     {
       path: "/footprint/edit/:id", // Sesuaikan sesuai kebutuhan Anda
       name: "edit-footprint",
-      component: () => import("../pages/EditFoot.vue"),
+      component: () => import("../Views/edit page/EditFoot.vue"),
     },
     {
       path: "/Canvas",
       name: "Canvas",
-      component: () => import("../components/canvas.vue"),
+      component: () => import("../Views/test/canvas.vue"),
     },
     {
       path: "/coice",
       name: "c",
-      component: () => import("../components/choice.vue"),
+      component: () => import("../Views/test/choice.vue"),
     },
   ],
 });
