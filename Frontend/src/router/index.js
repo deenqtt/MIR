@@ -21,9 +21,14 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: "/",
+      name: "",
+    },
+    {
       path: "/auth/register",
       name: "Register",
       component: Register,
+      meta: { requiresAuth: true },
     },
     {
       path: "/auth/login",
@@ -168,6 +173,10 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated()) {
     // Jika tidak, arahkan ke halaman login
     next({ name: "Login" });
+  } else if (to.name === "Login" || to.name === "Register") {
+    // Jika pengguna sudah login dan mencoba mengakses halaman login atau register
+    // Arahkan mereka ke halaman dashboard atau halaman lain yang sesuai
+    isAuthenticated() ? next({ name: "Dashboard" }) : next();
   } else {
     // Jika terotentikasi atau route tidak memerlukan otentikasi, lanjutkan navigasi
     next();
