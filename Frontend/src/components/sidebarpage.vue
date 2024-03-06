@@ -135,21 +135,21 @@ const ToggleMenu = () => {
   is_expanded.value = !is_expanded.value;
 };
 const logout = () => {
+  // Menutup tooltip sebelum melakukan logout
+  $('[data-toggle="tooltip"]').tooltip("hide");
+
   // Membersihkan status autentikasi dari localStorage menggunakan fungsi dari auth.js
   removeAuthToken();
-  window.location.reload();
+
   // Mengarahkan pengguna kembali ke halaman login
   router.push({ name: "Login" });
 };
+
 const onButtonHover = () => {
   console.log("Button hovered");
 };
 
 onMounted(() => {
-  $(document).ready(function () {
-    $("#element").tooltip("update");
-    $('[data-toggle="tooltip"]').tooltip();
-  });
   checkWindowSize();
   window.addEventListener("resize", checkWindowSize);
 });

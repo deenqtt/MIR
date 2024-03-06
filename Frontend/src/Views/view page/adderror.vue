@@ -96,7 +96,8 @@ const onSubmit = async () => {
 
     // Menambah notifikasi ke store Vuex setelah berhasil mengirim input
     store.commit("addNotification", { message: "Error Successfully Sent!" });
-
+    // Menambah pesan error ke store Vuex setelah berhasil mengirim input
+    store.commit("setErrorMessage", "Error Successfully Sent!");
     await Swal.fire("Success!", "Error Successfully Sent!", "success");
 
     // Clear the form fields after successful submission
@@ -108,9 +109,29 @@ const onSubmit = async () => {
 
     // Refetch errors after adding a new one
     fetchError();
+
+    // Mengirim pesan error kepada robot yang dipilih
+    const robotName = newError.value.Robotname;
+    const errorMessage = "Terjadi error, silakan cek sistem Anda.";
+    await sendErrorMessageToRobot(robotName, errorMessage);
   } catch (error) {
     console.error(error);
     errorMessage.value = "Failed to create error: " + error.message;
+  }
+};
+
+// Fungsi untuk mengirim pesan error kepada robot yang dipilih
+const sendErrorMessageToRobot = async (robotName, errorMessage) => {
+  try {
+    // Simulasikan pengiriman pesan ke robot dengan menggunakan API atau metode lainnya
+    console.log(`Sending error message to ${robotName}: ${errorMessage}`);
+    // Di sini Anda dapat mengimplementasikan logika untuk mengirim pesan ke robot yang dipilih
+    // Misalnya, dengan menggunakan WebSocket atau HTTP request ke endpoint yang sesuai
+  } catch (error) {
+    console.error(
+      `Failed to send error message to ${robotName}: ${error.message}`
+    );
+    // Handle error jika gagal mengirim pesan ke robot
   }
 };
 

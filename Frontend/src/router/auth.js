@@ -1,4 +1,4 @@
-// services/auth.js
+import { useRouter } from "vue-router";
 
 export function saveAuthToken(token) {
   localStorage.setItem("token", token);
@@ -14,5 +14,9 @@ export function isAuthenticated() {
 }
 
 export function logout() {
-  localStorage.removeItem("token");
+  console.log("Logout berhasil");
+  removeAuthToken();
+  window.location.reload();
+  const router = useRouter();
+  router.push({ name: "Login" });
 }

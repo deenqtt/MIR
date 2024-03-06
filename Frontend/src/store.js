@@ -5,8 +5,9 @@ export default createStore({
     selectedRobot: "",
     robotOptions: [],
     filteredMissions: [],
-    notifications: [], // Menambahkan properti notifications untuk menyimpan pesan notifikasi
-    unreadNotifications: 0, // Menambahkan properti untuk menyimpan jumlah notifikasi yang belum dibaca
+    notifications: [],
+    unreadNotifications: 0,
+    errorMessage: "",
   },
   mutations: {
     setSelectedRobot(state, robotName) {
@@ -20,20 +21,34 @@ export default createStore({
     },
     addNotification(state, notification) {
       state.notifications.push(notification);
-      // Menambah jumlah notifikasi yang belum dibaca setelah menambahkan notifikasi baru
       state.unreadNotifications++;
     },
     markAllNotificationsAsRead(state) {
-      // Mengubah properti read dari semua notifikasi menjadi true
       state.notifications.forEach((notification) => {
         notification.read = true;
       });
-      // Mengatur jumlah notifikasi yang belum dibaca menjadi 0 setelah semua notifikasi dibaca
       state.unreadNotifications = 0;
     },
-    // Mutasi untuk mengurangi jumlah notifikasi yang belum dibaca saat notifikasi dibaca
     updateUnreadNotifications(state) {
       state.unreadNotifications--;
+    },
+    setErrorMessage(state, errorMessage) {
+      state.errorMessage = errorMessage;
+    },
+  },
+  actions: {
+    // Fungsi untuk mengirim pesan error kepada robot yang dipilih
+    async sendErrorMessageToRobot({ state }, errorMessage) {
+      try {
+        const robotName = state.selectedRobot;
+        // Simulasikan pengiriman pesan ke robot dengan menggunakan API atau metode lainnya
+        console.log(`Sending error message to ${robotName}: ${errorMessage}`);
+        // Di sini Anda dapat mengimplementasikan logika untuk mengirim pesan ke robot yang dipilih
+        // Misalnya, dengan menggunakan WebSocket atau HTTP request ke endpoint yang sesuai
+      } catch (error) {
+        console.error(`Failed to send error message to ${robotName}: ${error.message}`);
+        // Handle error jika gagal mengirim pesan ke robot
+      }
     },
   },
 });

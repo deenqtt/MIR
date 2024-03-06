@@ -60,7 +60,7 @@
                   <button
                     id="edit"
                     class="fa-solid fa-pen-to-square"
-                    @click="editPath(footprint)"
+                    @click="editDesgin(footprint)"
                   >
                     <span>Edit</span>
                   </button>
@@ -200,7 +200,7 @@ const deleteDesign = async (footprint) => {
     try {
       // Hapus pengguna jika pengguna mengkonfirmasi
       await axios.delete(`${apiUrl}/${footprint.id}`);
-      fetchMission();
+      fetchDesign();
       // Tampilkan pesan sukses menggunakan SweetAlert
       await Swal.fire("Congratss!", "Design Has Deleted", "success");
     } catch (error) {
@@ -209,7 +209,7 @@ const deleteDesign = async (footprint) => {
   }
 };
 
-const editPath = (footprint) => {
+const editDesgin = (footprint) => {
   // Use router to navigate to "/edit" and pass the map data as a parameter
   router.push({
     name: "edit-footprint",
