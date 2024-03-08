@@ -219,9 +219,16 @@ const markNotificationsAsReadAndRemoveLocalStorage = () => {
 };
 // Menggunakan computed untuk mengecek apakah ada notifikasi yang belum dibaca
 const hasUnreadNotifications = computed(() => {
-  // Check if there are any unread notifications in the list
-  return notifications.value.some((notification) => !notification.read);
+  // Pastikan notifications.value tidak null atau undefined sebelum memanggil some()
+  if (notifications.value) {
+    // Check if there are any unread notifications in the list
+    return notifications.value.some((notification) => !notification.read);
+  } else {
+    // Jika notifications.value null atau undefined, kembalikan false
+    return false;
+  }
 });
+
 const addNotification = (notification) => {
   // Menambahkan notifikasi ke dalam array notifications
   store.commit("addNotification", { message: notification, read: false });

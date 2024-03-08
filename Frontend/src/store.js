@@ -1,4 +1,5 @@
 import { createStore } from "vuex";
+import axios from "axios";
 
 export default createStore({
   state: {
@@ -37,17 +38,36 @@ export default createStore({
     },
   },
   actions: {
-    // Fungsi untuk mengirim pesan error kepada robot yang dipilih
-    async sendErrorMessageToRobot({ state }, errorMessage) {
+    async fetchRobots({ commit }) {
+      try {
+        const response = await axios.get("http://localhost:5258/robots");
+        const robots = response.data;
+        commit("setRobots", robots);
+        const robotOptions = robots.map((robot) => robot.Name);
+        commit("setRobotOptions", robotOptions);
+      } catch (error) {
+        console.error("Failed to fetch robots:", error);
+      }
+    },
+    async sendErrorMessageToRobot({ state, commit }, errorMessage) {
       try {
         const robotName = state.selectedRobot;
-        // Simulasikan pengiriman pesan ke robot dengan menggunakan API atau metode lainnya
         console.log(`Sending error message to ${robotName}: ${errorMessage}`);
-        // Di sini Anda dapat mengimplementasikan logika untuk mengirim pesan ke robot yang dipilih
-        // Misalnya, dengan menggunakan WebSocket atau HTTP request ke endpoint yang sesuai
+        const selectedRobot = state.robots.find(
+          (robot) => robot.Name === robotName
+        );
+        if (selectedRobot) {
+          commit("setRobotError", {
+            robotId: selectedRobot.Id,
+            hasError: true,
+          });
+        }
+        // Simulate sending error message to robot
+        // Replace this with actual logic to send error message to robot
       } catch (error) {
-        console.error(`Failed to send error message to ${robotName}: ${error.message}`);
-        // Handle error jika gagal mengirim pesan ke robot
+        console.error(
+          `Failed to send error message to ${robotName}: ${error.message}`
+        );
       }
     },
   },

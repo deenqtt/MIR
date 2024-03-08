@@ -16,7 +16,7 @@
                 <select
                   class="custom-select"
                   id="inputGroupSelect01"
-                  v-model="newError.Robotname"
+                  v-model="selectedRobot"
                 >
                   <option selected>Choose...</option>
                   <option
@@ -65,84 +65,45 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useStore } from "vuex";
-const store = useStore();
-const robotOptions = ref([]);
-const errorMessage = ref("");
-const apiUrl = "http://localhost:5258/errors";
-const newError = ref({
-  Robotname: "",
-  Date: "",
-  Explained: "",
-});
-
+import store from "../../store";
+const selectedRobot = ref("");
+const newError = ref({ Date: "", Explained: "" });
+const robotOptions = ref("");
 const onSubmit = async () => {
   try {
     if (
-      !newError.value.Robotname ||
+      !selectedRobot.value ||
       !newError.value.Date ||
       !newError.value.Explained
     ) {
-      // Show an alert or set an error message indicating that the form is incomplete
       await Swal.fire("Please fill all fields", "", "warning");
       return;
     }
 
-    const response = await axios.post(apiUrl, newError.value);
-    console.log(response.data);
+    const response = await axios.post("http://localhost:5258/errors", {
+      Robotname: selectedRobot.value,
+      Date: newError.value.Date,
+      Explained: newError.value.Explained,
+    });
 
-    // Menambah notifikasi ke store Vuex setelah berhasil mengirim input
-    store.commit("addNotification", { message: "Error Successfully Sent!" });
-    // Menambah pesan error ke store Vuex setelah berhasil mengirim input
-    store.commit("setErrorMessage", "Error Successfully Sent!");
+    // Jika pesan kesalahan berhasil dikirim, tambahkan notifikasi ke toko Vuex
+    store.commit("addNotification", {
+      message: "Error Successfully Sent!",
+      read: false, // Set notifikasi sebagai belum dibaca
+    });
+
     await Swal.fire("Success!", "Error Successfully Sent!", "success");
 
-    // Clear the form fields after successful submission
-    newError.value = {
-      Robotname: "",
-      Date: "",
-      Explained: "",
-    };
-
-    // Refetch errors after adding a new one
-    fetchError();
-
-    // Mengirim pesan error kepada robot yang dipilih
-    const robotName = newError.value.Robotname;
-    const errorMessage = "Terjadi error, silakan cek sistem Anda.";
-    await sendErrorMessageToRobot(robotName, errorMessage);
+    newError.value = { Date: "", Explained: "" };
   } catch (error) {
     console.error(error);
-    errorMessage.value = "Failed to create error: " + error.message;
+    await Swal.fire("Failed!", "Error Sending Failed!", "error");
   }
 };
 
-// Fungsi untuk mengirim pesan error kepada robot yang dipilih
-const sendErrorMessageToRobot = async (robotName, errorMessage) => {
-  try {
-    // Simulasikan pengiriman pesan ke robot dengan menggunakan API atau metode lainnya
-    console.log(`Sending error message to ${robotName}: ${errorMessage}`);
-    // Di sini Anda dapat mengimplementasikan logika untuk mengirim pesan ke robot yang dipilih
-    // Misalnya, dengan menggunakan WebSocket atau HTTP request ke endpoint yang sesuai
-  } catch (error) {
-    console.error(
-      `Failed to send error message to ${robotName}: ${error.message}`
-    );
-    // Handle error jika gagal mengirim pesan ke robot
-  }
-};
-
-const fetchError = async () => {
-  try {
-    const response = await axios.get(apiUrl);
-    errors.value = response.data;
-  } catch (error) {
-    errorMessage.value = "Failed to fetch maps: " + error.message;
-  }
-};
 const fetchRobots = async () => {
   try {
     const response = await axios.get("http://localhost:5258/robots");
@@ -151,8 +112,17 @@ const fetchRobots = async () => {
     console.error("Error fetching robot names:", error);
   }
 };
+const sendErrorMessageToRobot = async (robotName, errorMessage) => {
+  try {
+    console.log(`Sending error message to ${robotName}: ${errorMessage}`);
+    await store.dispatch("sendErrorMessageToRobot", errorMessage);
+  } catch (error) {
+    console.error(
+      `Failed to send error message to ${robotName}: ${error.message}`
+    );
+  }
+};
 onMounted(() => {
-  fetchError();
   fetchRobots();
 });
 </script>
@@ -187,12 +157,11 @@ onMounted(() => {
 
 .image-container {
   width: 50%;
-
-  text-align: center; /* Menempatkan gambar ke kanan */
+  text-align: center;
 }
 
 .error-image {
-  width: 400px; /* Mengurangi ukuran gambar */
+  width: 400px;
   height: 300px;
   border-radius: 20px;
 }

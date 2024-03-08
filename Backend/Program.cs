@@ -38,7 +38,7 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<FullStackContext>();
     dbContext.Database.Migrate();
 }
-
+app.UseCors();
 
 //Endpoint User for method Get all data, Get data use ID, Create or add data user, Update data User, Delete data user
 // Endpoint for user login
@@ -171,18 +171,39 @@ app.MapPut("/robots/{id}", async (int id, Robot updatedRobot, FullStackContext d
     return Results.NoContent();
 });
 
-// Endpoint to delete a robot
 app.MapDelete("/robots/{id}", async (int id, FullStackContext db) =>
 {
     if (await db.Robots.FindAsync(id) is Robot robot)
     {
+        // Hapus robot dari tabel Robot
         db.Robots.Remove(robot);
+
+        // Hapus semua misi yang terkait dengan robot yang dihapus
+        var missionsToDelete = await db.Missions.Where(m => m.Robot == robot.Name).ToListAsync();
+        db.Missions.RemoveRange(missionsToDelete);
+
+        // Hapus semua jejak kaki yang terkait dengan robot yang dihapus
+        var footprintsToDelete = await db.Footprints.Where(f => f.Robotname == robot.Name).ToListAsync();
+        db.Footprints.RemoveRange(footprintsToDelete);
+
+        // Hapus semua kesalahan yang terkait dengan robot yang dihapus
+        var errorsToDelete = await db.Errors.Where(e => e.Robotname == robot.Name).ToListAsync();
+        db.Errors.RemoveRange(errorsToDelete);
+
+        // Hapus semua aktivitas yang terkait dengan robot yang dihapus
+        var activitiesToDelete = await db.Activities.Where(a => a.Robotname == robot.Name).ToListAsync();
+        db.Activities.RemoveRange(activitiesToDelete);
+
+        // Simpan perubahan ke database
         await db.SaveChangesAsync();
+
+        // Mengembalikan respons dengan robot yang dihapus
         return Results.Ok(robot);
     }
 
     return Results.NotFound();
 });
+
 
 // Endpoint to get all maps
 app.MapGet("/maps", async (FullStackContext db) =>
@@ -192,16 +213,25 @@ app.MapGet("/maps", async (FullStackContext db) =>
 app.MapGet("/maps/{id}", async (int id, FullStackContext db) =>
     await db.Maps.FindAsync(id) is Map map ? Results.Ok(map) : Results.NotFound());
 
-// Endpoint to create a new map
+// Endpoint untuk membuat map baru
 app.MapPost("/maps", async (Map map, FullStackContext db) =>
 {
-    // Add the map to the database
+    // Tambahkan map ke database
     db.Maps.Add(map);
 
-    // Save changes to the database
+    // Simpan perubahan ke database
     await db.SaveChangesAsync();
 
-    // Return the created map with the appropriate status code and location header
+    // Tambahkan entri ke tabel Activities dengan data yang sesuai
+    var activity = new Activitie
+    {
+       
+       
+    };
+    db.Activities.Add(activity);
+    await db.SaveChangesAsync();
+
+    // Kembalikan map yang dibuat dengan kode status dan header lokasi yang sesuai
     return Results.Created($"/maps/{map.Id}", map);
 });
 
@@ -255,18 +285,29 @@ app.MapGet("/missions/all", async (FullStackContext db) =>
 app.MapGet("/missions/{id}", async (int id, FullStackContext db) =>
     await db.Missions.FindAsync(id) is Mission mission ? Results.Ok(mission) : Results.NotFound());
 
-// Endpoint to create a new mission
+// Endpoint untuk membuat mission baru
 app.MapPost("/missions", async (Mission mission, FullStackContext db) =>
 {
-    // Add the mission to the database
+    // Tambahkan mission ke database
     db.Missions.Add(mission);
 
-    // Save changes to the database
+    // Simpan perubahan ke database
     await db.SaveChangesAsync();
 
-    // Return the created mission with the appropriate status code and location header
+    // Tambahkan entri ke tabel Activities dengan data yang sesuai
+    var activity = new Activitie
+    {
+        Robotname = mission.Robot,
+        Date = DateTime.Now,
+        Activitiy = $"Added 1 new mission: {mission.Name}"
+    };
+    db.Activities.Add(activity);
+    await db.SaveChangesAsync();
+
+    // Kembalikan mission yang dibuat dengan kode status dan header lokasi yang sesuai
     return Results.Created($"/missions/{mission.Id}", mission);
 });
+
 
 // Endpoint to update a mission
 app.MapPut("/missions/{id}", async (int id, Mission updatedMission, FullStackContext db) =>
@@ -316,6 +357,7 @@ app.MapPost("/paths", async (Path path, FullStackContext db) =>
     // Return the created path with the appropriate status code and location header
     return Results.Created($"/paths/{path.Id}", path);
 });
+
 
 // Endpoint to update a path
 app.MapPut("/paths/{id}", async (int id, Path updatedPath, FullStackContext db) =>
@@ -502,11 +544,20 @@ app.MapGet("/errors", async (FullStackContext db) =>
 app.MapGet("/errors/{id}", async (int id, FullStackContext db) =>
     await db.Errors.FindAsync(id) is Error error ? Results.Ok(error) : Results.NotFound());
 
-// Endpoint to create a new error
 app.MapPost("/errors", async (Error error, FullStackContext db) =>
 {
     // Add the error to the database
     db.Errors.Add(error);
+
+    // Create a new activity entry based on the error information
+    var newActivity = new Activitie
+    {
+        Robotname = error.Robotname,
+        Date = DateTime.Now, // Gunakan tanggal dan waktu saat ini
+        Activitiy = $"Error occurred: {error.Explained}"
+    };
+
+    db.Activities.Add(newActivity);
 
     // Save changes to the database
     await db.SaveChangesAsync();
@@ -514,6 +565,7 @@ app.MapPost("/errors", async (Error error, FullStackContext db) =>
     // Return the created error with the appropriate status code and location header
     return Results.Created($"/errors/{error.Id}", error);
 });
+
 
 // Endpoint to update an error
 app.MapPut("/errors/{id}", async (int id, Error updatedError, FullStackContext db) =>
@@ -543,6 +595,82 @@ app.MapDelete("/errors/{id}", async (int id, FullStackContext db) =>
 });
 
 
+/// Endpoint untuk mendapatkan semua aktivitas
+app.MapGet("/activities", async (FullStackContext db) =>
+    await db.Activities.ToListAsync());
+
+// Endpoint untuk mendapatkan aktivitas berdasarkan nama robot
+app.MapGet("/activities/robot/{robotName}", async (string robotName, FullStackContext db) =>
+{
+    // Cari aktivitas berdasarkan nama robot yang dipilih
+    var activities = await db.Activities
+        .Where(a => a.Robotname == robotName)
+        .ToListAsync();
+
+    if (activities.Count == 0)
+    {
+        return Results.NotFound("No activities found for the specified robot.");
+    }
+
+    return Results.Ok(activities);
+});
+
+// Endpoint untuk mendapatkan aktivitas berdasarkan ID
+app.MapGet("/activities/{id}", async (int id, FullStackContext db) =>
+    await db.Activities.FindAsync(id) is Activitie activitie ? Results.Ok(activitie) : Results.NotFound());
+
+// Endpoint untuk membuat aktivitas baru
+app.MapPost("/activities", async (Activitie activitie, FullStackContext db) =>
+{
+    // Tambahkan aktivitas ke database
+    db.Activities.Add(activitie);
+
+    // Hitung waktu kedaluwarsa 24 jam setelah waktu input
+    activitie.ExpiryTime = activitie.Date.AddHours(24);
+
+    // Simpan perubahan ke database
+    await db.SaveChangesAsync();
+
+    // Kembalikan aktivitas yang dibuat dengan kode status dan header lokasi yang sesuai
+    return Results.Created($"/activities/{activitie.Id}", activitie);
+});
+
+
+// Endpoint untuk memperbarui aktivitas
+app.MapPut("/activities/{id}", async (int id, Activitie updatedActivitie, FullStackContext db) =>
+{
+    var activitie = await db.Activities.FindAsync(id);
+    if (activitie is null) return Results.NotFound();
+
+    // Perbarui properti aktivitas dengan properti yang diperbarui
+    activitie.Robotname = updatedActivitie.Robotname;
+    activitie.Date = updatedActivitie.Date;
+    activitie.Activitiy = updatedActivitie.Activitiy;
+
+    // Simpan perubahan ke database
+    await db.SaveChangesAsync();
+
+    // Kembalikan respons tanpa konten
+    return Results.NoContent();
+});
+
+// Endpoint untuk menghapus aktivitas
+app.MapDelete("/activities/{id}", async (int id, FullStackContext db) =>
+{
+    var activitie = await db.Activities.FindAsync(id);
+    if (activitie is null) return Results.NotFound();
+
+    // Hapus aktivitas dari database
+    db.Activities.Remove(activitie);
+
+    // Simpan perubahan ke database
+    await db.SaveChangesAsync();
+
+    // Kembalikan respons dengan aktivitas yang dihapus
+    return Results.Ok(activitie);
+});
+
+
 app.UseCors();
 app.Run();
 
@@ -557,7 +685,7 @@ public class FullStackContext : DbContext
     public DbSet<Footprint> Footprints { get; set; } //Table Footprnt
     public DbSet<Modul> Moduls { get; set; } //Table Modul
     public DbSet<Error> Errors {get; set;}//table error
-    
+    public DbSet<Activitie> Activities {get; set;}//tabel activities
    
     public FullStackContext(DbContextOptions<FullStackContext> options) : base(options) { }
 
@@ -626,5 +754,14 @@ public class Error
     public string? Explained { get; set; } 
    
 }
+public class Activitie
+{
+    public int Id { get; set; }
+    public string? Robotname { get; set; }
+    public DateTime Date { get; set; } // Menggunakan DateTime untuk tanggal dan waktu
+    public string? Activitiy { get; set; } 
+    public DateTime ExpiryTime { get; set; } // Add ExpiryTime property
+}
+
 
 

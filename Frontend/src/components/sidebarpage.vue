@@ -127,7 +127,11 @@ const hasUnreadNotifications = computed(() => {
 const handleNotificationClick = () => {
   // Mengosongkan jumlah notifikasi yang belum dibaca saat ikon diklik
   store.commit("markAllNotificationsAsRead");
+
+  // Menyembunyikan ikon notifikasi saat diklik
+  hasUnreadNotifications.value = false;
 };
+
 const checkWindowSize = () => {
   is_mobile.value = window.innerWidth <= 660;
 };

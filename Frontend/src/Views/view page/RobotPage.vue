@@ -127,11 +127,17 @@ const deleteRobot = async (robot) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      await axios.delete(`${apiUrl}/${robot.id}`);
+      // Panggil endpoint backend untuk menghapus robot
+      await axios.delete(`http://localhost:5258/robots/${robot.id}`);
+
+      // Refresh daftar robot setelah penghapusan
       fetchRobots();
-      await Swal.fire("Success!", "Maps succesfull delete.", "success");
+
+      // Tampilkan pesan sukses
+      await Swal.fire("Success!", "Robot successfully deleted.", "success");
     } catch (error) {
-      errorMessage.value = "Failed to delete user: " + error.message;
+      // Tangani kesalahan jika gagal menghapus robot
+      errorMessage.value = "Failed to delete robot: " + error.message;
     }
   }
 };
