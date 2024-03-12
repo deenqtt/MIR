@@ -14,7 +14,7 @@
                 <span
                   class="fa-solid"
                   data-toggle="tooltip"
-                  data-placement="bottom"
+                  data-bs-placement="bottom"
                   title="Start/Pause?"
                 >
                   <i v-if="isPlaying" class="fa-solid fa-pause"></i>
@@ -45,7 +45,7 @@
                 <span
                   class="fa-solid fa-robot"
                   data-toggle="tooltip"
-                  data-bs-placement="bottom"
+                  data-bs-placement="right"
                   title="Select Robot"
                 ></span>
               </a>
@@ -76,7 +76,7 @@
                 <span
                   class="fa-solid fa-gamepad"
                   data-toggle="tooltip"
-                  data-bs-placement="bottom"
+                  data-bs-placement="right"
                   title="Joystick"
                 ></span>
               </a>
@@ -120,8 +120,9 @@
                     class="fa-solid fa-bell"
                     id="notificationIcon"
                     data-toggle="tooltip"
-                    data-bs-placement="bottom"
+                    data-bs-placement="right"
                     title="Notification"
+                    @click.stop="removeNotifications"
                   ></span>
                   <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
                   <span
@@ -137,8 +138,8 @@
               >
                 <!-- Menampilkan notifikasi dari state Vuex -->
                 <a
-                  v-for="notification in notifications"
-                  :key="notification.id"
+                  v-for="(notification, index) in notifications"
+                  :key="index"
                   class="dropdown-item"
                   href="#"
                 >
@@ -205,6 +206,16 @@ const hoveredNotif = ref(false);
 const dropdownOpen = ref(false);
 const dropdownOpen1 = ref(false);
 
+// Fungsi untuk menghapus notifikasi saat ikon notifikasi diklik
+const removeNotifications = () => {
+  // Panggil aksi Vuex untuk menghapus notifikasi
+  store.dispatch("removeNotification");
+};
+
+// Dapatkan nilai boolean apakah ada notifikasi yang belum dibaca
+const hasUnreadNotifications = computed(() => {
+  return store.state.unreadNotifications > 0;
+});
 const move = (direction) => {
   console.log(`Move to ${direction}`);
 };
@@ -217,17 +228,6 @@ const markNotificationsAsReadAndRemoveLocalStorage = () => {
   // Remove the flag indicating unread notifications from local storage
   localStorage.removeItem("hasUnreadNotifications");
 };
-// Menggunakan computed untuk mengecek apakah ada notifikasi yang belum dibaca
-const hasUnreadNotifications = computed(() => {
-  // Pastikan notifications.value tidak null atau undefined sebelum memanggil some()
-  if (notifications.value) {
-    // Check if there are any unread notifications in the list
-    return notifications.value.some((notification) => !notification.read);
-  } else {
-    // Jika notifications.value null atau undefined, kembalikan false
-    return false;
-  }
-});
 
 const addNotification = (notification) => {
   // Menambahkan notifikasi ke dalam array notifications
@@ -239,6 +239,7 @@ const addNotification = (notification) => {
 const notifications = computed(() => {
   return store.state.notifications;
 });
+
 const router = useRouter();
 
 const toggleDropdown = () => {

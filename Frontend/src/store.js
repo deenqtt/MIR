@@ -1,5 +1,4 @@
 import { createStore } from "vuex";
-import axios from "axios";
 
 export default createStore({
   state: {
@@ -36,38 +35,17 @@ export default createStore({
     setErrorMessage(state, errorMessage) {
       state.errorMessage = errorMessage;
     },
+    removeNotification(state, notificationIndex) {
+      state.notifications.splice(notificationIndex, 1);
+      state.unreadNotifications--;
+    },
   },
   actions: {
-    async fetchRobots({ commit }) {
+    async removeNotification({ commit, state }, notificationIndex) {
       try {
-        const response = await axios.get("http://localhost:5258/robots");
-        const robots = response.data;
-        commit("setRobots", robots);
-        const robotOptions = robots.map((robot) => robot.Name);
-        commit("setRobotOptions", robotOptions);
+        commit("removeNotification", notificationIndex);
       } catch (error) {
-        console.error("Failed to fetch robots:", error);
-      }
-    },
-    async sendErrorMessageToRobot({ state, commit }, errorMessage) {
-      try {
-        const robotName = state.selectedRobot;
-        console.log(`Sending error message to ${robotName}: ${errorMessage}`);
-        const selectedRobot = state.robots.find(
-          (robot) => robot.Name === robotName
-        );
-        if (selectedRobot) {
-          commit("setRobotError", {
-            robotId: selectedRobot.Id,
-            hasError: true,
-          });
-        }
-        // Simulate sending error message to robot
-        // Replace this with actual logic to send error message to robot
-      } catch (error) {
-        console.error(
-          `Failed to send error message to ${robotName}: ${error.message}`
-        );
+        console.error("Failed to remove notification:", error);
       }
     },
   },

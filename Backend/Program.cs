@@ -177,7 +177,9 @@ app.MapDelete("/robots/{id}", async (int id, FullStackContext db) =>
     {
         // Hapus robot dari tabel Robot
         db.Robots.Remove(robot);
-
+  // Hapus semua misi yang terkait dengan robot yang dihapus
+        var mapsToDelete = await db.Maps.Where(m => m.Creator == robot.Name).ToListAsync();
+        db.Maps.RemoveRange(mapsToDelete);
         // Hapus semua misi yang terkait dengan robot yang dihapus
         var missionsToDelete = await db.Missions.Where(m => m.Robot == robot.Name).ToListAsync();
         db.Missions.RemoveRange(missionsToDelete);
@@ -225,15 +227,24 @@ app.MapPost("/maps", async (Map map, FullStackContext db) =>
     // Tambahkan entri ke tabel Activities dengan data yang sesuai
     var activity = new Activitie
     {
-       
-       
+        Robotname =  map.Creator,
+        Date = DateTime.Now,
+        Activitiy = $"Added 1 new map: { map.Name}"
     };
+
+    // Set expiry date 24 jam setelah waktu input
+    activity.ExpiryTime = activity.Date.AddHours(24);
+
+    // Tambahkan aktivitas ke database
     db.Activities.Add(activity);
+
+    // Simpan perubahan ke database
     await db.SaveChangesAsync();
 
     // Kembalikan map yang dibuat dengan kode status dan header lokasi yang sesuai
     return Results.Created($"/maps/{map.Id}", map);
 });
+
 
 // Endpoint to update a map
 app.MapPut("/maps/{id}", async (int id, Map updatedMap, FullStackContext db) =>
@@ -301,7 +312,14 @@ app.MapPost("/missions", async (Mission mission, FullStackContext db) =>
         Date = DateTime.Now,
         Activitiy = $"Added 1 new mission: {mission.Name}"
     };
+
+    // Set expiry date 24 jam setelah waktu input
+    activity.ExpiryTime = activity.Date.AddHours(24);
+
+    // Tambahkan aktivitas ke database
     db.Activities.Add(activity);
+
+    // Simpan perubahan ke database
     await db.SaveChangesAsync();
 
     // Kembalikan mission yang dibuat dengan kode status dan header lokasi yang sesuai
@@ -557,6 +575,10 @@ app.MapPost("/errors", async (Error error, FullStackContext db) =>
         Activitiy = $"Error occurred: {error.Explained}"
     };
 
+    // Set expiry date 24 jam setelah waktu input
+    newActivity.ExpiryTime = newActivity.Date.AddHours(24);
+
+
     db.Activities.Add(newActivity);
 
     // Save changes to the database
@@ -625,15 +647,14 @@ app.MapPost("/activities", async (Activitie activitie, FullStackContext db) =>
     // Tambahkan aktivitas ke database
     db.Activities.Add(activitie);
 
-    // Hitung waktu kedaluwarsa 24 jam setelah waktu input
-    activitie.ExpiryTime = activitie.Date.AddHours(24);
-
+    
     // Simpan perubahan ke database
     await db.SaveChangesAsync();
 
     // Kembalikan aktivitas yang dibuat dengan kode status dan header lokasi yang sesuai
     return Results.Created($"/activities/{activitie.Id}", activitie);
 });
+
 
 
 // Endpoint untuk memperbarui aktivitas
@@ -762,6 +783,5 @@ public class Activitie
     public string? Activitiy { get; set; } 
     public DateTime ExpiryTime { get; set; } // Add ExpiryTime property
 }
-
 
 
