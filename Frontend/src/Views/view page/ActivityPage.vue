@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="d-flex">
-      <h5 class="h5span"><span>Activ</span>ities</h5>
+      <h5 class="h5span"><span>Activities</span></h5>
       <div class="dropdown show">
         <a
           class="dropdown-toggle"
@@ -11,8 +11,7 @@
           data-toggle="dropdown"
           aria-haspopup="true"
           aria-expanded="false"
-        >
-        </a>
+        ></a>
 
         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
           <a
@@ -37,7 +36,7 @@
               <div class="today text-white">
                 <h5>Today</h5>
               </div>
-              <div class="filter text-white" @click="toggleFilter()">
+              <div class="filter text-white" @click="showFilterModal">
                 <h5 style="font-size: medium; margin-right: 10px">
                   Filter
                   <i
@@ -50,45 +49,109 @@
             </div>
             <div class="last content">
               <div class="activity text-white">
-                <!-- Tampilkan gambar saat tidak ada aktivitas -->
+                <!-- Display image when no activities -->
                 <img
                   v-if="!selectedRobot"
                   src="../image/robotsearch.png.png"
                   alt=""
                   class="no-activities-img"
                 />
-                <!-- Tampilkan pesan saat belum memilih robot -->
+                <!-- Display message when no robot is selected -->
                 <div v-if="!selectedRobot" class="no-activities-text">
                   <p>Please select a robot to view activities.</p>
                 </div>
-                <!-- Tampilkan pesan jika tidak ada aktivitas -->
+                <!-- Display message if no activities are available -->
                 <div
                   v-else-if="activities.length === 0"
                   class="no-activities-text"
                 >
                   <p>No activities available for this robot.</p>
                 </div>
-                <!-- Tampilkan aktivitas jika ada -->
+                <!-- Display activities if available -->
                 <div v-else>
+                  <!-- Display message if no activities are available for the selected time range -->
                   <div
-                    v-for="activity in activities"
-                    :key="activity.id"
-                    class="activity-item"
+                    v-if="activities.length === 0"
+                    class="no-activities-text"
                   >
-                    <!-- Deskripsi aktivitas -->
-                    <div class="activity-description text-white">
-                      <p class="d-flex">
-                        <span class="bullet">
-                          <p class="activity-time">
-                            {{ formatTime(activity.date) }}
-                          </p> </span
-                        >{{ activity.activitiy }}
-                      </p>
+                    <p>No activities at this time.</p>
+                  </div>
+                  <!-- Display activities if available -->
+                  <div v-else>
+                    <div
+                      v-for="activitie in activities"
+                      :key="activitie.id"
+                      class="activity-item"
+                    >
+                      <!-- Activity description -->
+                      <div class="activity-description text-white">
+                        <p class="d-flex">
+                          <span class="bullet">
+                            <p class="activity-time">
+                              {{ formatTime(activitie.date) }}
+                            </p>
+                          </span>
+                          {{ activitie.activity }}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for time filter -->
+    <div
+      class="modal fade"
+      id="filterModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="filterModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="filterModalLabel">
+              Filter Activities by Time
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+              @click="hideFilterModal"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- Input to select time range -->
+            <label for="startTime">Start Time:</label>
+            <input
+              type="time"
+              id="startTime"
+              name="startTime"
+              v-model="startTime"
+            />
+            <label for="endTime">End Time:</label>
+            <input type="time" id="endTime" name="endTime" v-model="endTime" />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" @click="applyFilter">
+              Apply Filter
+            </button>
           </div>
         </div>
       </div>
@@ -100,14 +163,12 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-// Definisikan variabel reaktif untuk menyimpan daftar robot dan aktivitas
 const robotOptions = ref([]);
-const activities = ref([]); // Tambahkan definisi untuk variabel activities
-const currentError = ref(""); // Tambahkan definisi untuk variabel currentError
-
+const activities = ref([]);
 const selectedRobot = ref(null);
+const startTime = ref("");
+const endTime = ref("");
 
-// Fungsi untuk mengambil daftar nama robot dari backend
 async function fetchRobots() {
   try {
     const response = await axios.get("http://localhost:5258/robots");
@@ -117,36 +178,51 @@ async function fetchRobots() {
   }
 }
 
-// Fungsi untuk mengambil aktivitas dari backend berdasarkan nama robot yang dipilih
 const fetchActivities = (robotName) => {
+  let url = `http://localhost:5258/activities/robot/${robotName}`;
+
+  if (startTime.value && endTime.value) {
+    url += `?startTime=${startTime.value}&endTime=${endTime.value}`;
+  }
+
   return axios
-    .get(`http://localhost:5258/activities/robot/${robotName}`)
+    .get(url)
     .then((response) => {
       activities.value = response.data;
-      currentError.value = ""; // Bersihkan pesan error jika berhasil
     })
     .catch((error) => {
       console.error("Error fetching activities:", error);
-      currentError.value = "No activities found for the specified robot."; // Set pesan error
+      activities.value = [];
     });
 };
 
-// Fungsi yang dipanggil saat robot dipilih
 function selectRobot(robot) {
   selectedRobot.value = robot;
-  fetchActivities(robot); // Panggil fungsi fetchActivities dengan nama robot yang dipilih
+  fetchActivities(robot);
 }
 
-// Fungsi yang dipanggil saat komponen dimuat
 onMounted(() => {
-  // Panggil fungsi fetchRobots saat komponen dimuat untuk mengambil daftar nama robot
   fetchRobots();
 });
 
-// Fungsi untuk memformat waktu
 function formatTime(dateString) {
   const date = new Date(dateString);
   return `${date.getHours()}:${date.getMinutes()}`;
+}
+
+function showFilterModal() {
+  $("#filterModal").modal("show");
+}
+
+function hideFilterModal() {
+  $("#filterModal").modal("hide");
+}
+
+function applyFilter() {
+  if (selectedRobot.value) {
+    fetchActivities(selectedRobot.value);
+  }
+  hideFilterModal();
 }
 </script>
 
@@ -182,6 +258,7 @@ function formatTime(dateString) {
   flex-direction: column;
   font-family: "Poppins", sans-serif;
 }
+
 .card {
   border-radius: 10px;
   border: none;
