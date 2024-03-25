@@ -122,12 +122,13 @@
                     data-toggle="tooltip"
                     data-bs-placement="right"
                     title="Notification"
-                    @click.stop="removeNotifications"
+                    @click.stop="toggleDropdown"
                   ></span>
+
                   <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
                   <span
                     class="notification-dot"
-                    v-if="hasUnreadNotifications"
+                    v-if="hasUnreadNotifications && notifications.length > 0"
                   ></span>
                 </div>
               </a>
@@ -142,6 +143,7 @@
                   :key="index"
                   class="dropdown-item"
                   href="#"
+                  @click="removeNotifications(index)"
                 >
                   {{ notification }}
                 </a>
@@ -206,10 +208,9 @@ const hoveredNotif = ref(false);
 const dropdownOpen = ref(false);
 const dropdownOpen1 = ref(false);
 
-// Fungsi untuk menghapus notifikasi saat ikon notifikasi diklik
-const removeNotifications = () => {
-  // Panggil aksi Vuex untuk menghapus notifikasi
-  store.dispatch("removeNotification");
+const removeNotifications = (notificationIndex) => {
+  // Remove the clicked notification from the list
+  store.dispatch("removeNotification", notificationIndex);
 };
 
 // Dapatkan nilai boolean apakah ada notifikasi yang belum dibaca
@@ -228,14 +229,14 @@ const markNotificationsAsReadAndRemoveLocalStorage = () => {
   // Remove the flag indicating unread notifications from local storage
   localStorage.removeItem("hasUnreadNotifications");
 };
-
 const addNotification = (notification) => {
   // Menambahkan notifikasi ke dalam array notifications
-  store.commit("addNotification", { message: notification, read: false });
+  store.commit("addNotification", notification);
 
   // Set a flag in local storage to indicate that there are unread notifications
   localStorage.setItem("hasUnreadNotifications", true);
 };
+
 const notifications = computed(() => {
   return store.state.notifications;
 });
@@ -264,7 +265,7 @@ const selectRobot = async (robotName) => {
 const fetchMissions = async (robot) => {
   try {
     const response = await axios.get(
-      `http://localhost:5258/missions?robot=${robot}`
+      `http://localhost:5258/missions/filtered-by-robot?robot=${robot}`
     );
 
     console.log("API Response:", response.data);

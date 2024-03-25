@@ -232,7 +232,7 @@ app.MapPost("/maps", async (Map map, FullStackContext db) =>
         Activity = $"Added 1 new map: { map.Name}"
     };
 
-    // Set expiry date 24 jam setelah waktu input
+         // Set expiry date 24 jam setelah waktu input
     activity.ExpiryTime = activity.Date.AddHours(24);
 
     // Tambahkan aktivitas ke database
@@ -240,6 +240,10 @@ app.MapPost("/maps", async (Map map, FullStackContext db) =>
 
     // Simpan perubahan ke database
     await db.SaveChangesAsync();
+
+
+
+ 
 
     // Kembalikan map yang dibuat dengan kode status dan header lokasi yang sesuai
     return Results.Created($"/maps/{map.Id}", map);
@@ -271,8 +275,8 @@ app.MapDelete("/maps/{id}", async (int id, FullStackContext db) =>
     }
 
     return Results.NotFound();
-});// Endpoint to get all missions or filtered missions by robot
-app.MapGet("/missions", async (FullStackContext db, [FromQuery] string robot) =>
+});
+app.MapGet("/missions/filtered-by-robot", async (FullStackContext db, [FromQuery] string robot) =>
 {
     IQueryable<Mission> missions = db.Missions;
 
@@ -283,6 +287,7 @@ app.MapGet("/missions", async (FullStackContext db, [FromQuery] string robot) =>
 
     return await missions.ToListAsync();
 });
+
 
 // Endpoint to get all missions regardless of the robot parameter
 app.MapGet("/missions/all", async (FullStackContext db) =>
@@ -309,7 +314,7 @@ app.MapPost("/missions", async (Mission mission, FullStackContext db) =>
     var activity = new Activitie
     {
         Robotname = mission.Robot,
-        Date = DateTime.Now,
+        Date = DateTime.UtcNow, // Menggunakan UTC untuk tanggal dan waktu
         Activity = $"Added 1 new mission: {mission.Name}"
     };
 
@@ -325,6 +330,31 @@ app.MapPost("/missions", async (Mission mission, FullStackContext db) =>
     // Kembalikan mission yang dibuat dengan kode status dan header lokasi yang sesuai
     return Results.Created($"/missions/{mission.Id}", mission);
 });
+
+// Fungsi untuk menghapus entri aktivitas yang kadaluwarsa dari tabel Activities
+async Task RemoveExpiredActivities(FullStackContext db)
+{
+    // Dapatkan daftar aktivitas yang kadaluwarsa (ExpiryTime <= waktu sekarang)
+    var expiredActivities = await db.Activities.Where(a => a.ExpiryTime <= DateTime.UtcNow).ToListAsync();
+
+    // Hapus entri yang kadaluwarsa dari database
+    db.Activities.RemoveRange(expiredActivities);
+    await db.SaveChangesAsync();
+}
+
+// Panggil fungsi RemoveExpiredActivities secara teratur, misalnya setiap jam
+var interval = TimeSpan.FromHours(1); // Panggil setiap jam
+var timer = new System.Threading.Timer(async _ =>
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<FullStackContext>();
+        await RemoveExpiredActivities(dbContext);
+    }
+}, null, TimeSpan.Zero, interval);
+
+
+
 
 
 // Endpoint to update a mission
@@ -571,7 +601,7 @@ app.MapPost("/errors", async (Error error, FullStackContext db) =>
     var newActivity = new Activitie
     {
         Robotname = error.Robotname,
-        Date = DateTime.Now, // Gunakan tanggal dan waktu saat ini
+       Date = DateTime.UtcNow, // Gunakan tanggal dan waktu saat ini
         Activity = $"Error occurred: {error.Explained}"
     };
 
@@ -579,10 +609,12 @@ app.MapPost("/errors", async (Error error, FullStackContext db) =>
     newActivity.ExpiryTime = newActivity.Date.AddHours(24);
 
 
+    // Tambahkan aktivitas ke database
     db.Activities.Add(newActivity);
 
-    // Save changes to the database
+    // Simpan perubahan ke database
     await db.SaveChangesAsync();
+
 
     // Return the created error with the appropriate status code and location header
     return Results.Created($"/errors/{error.Id}", error);
@@ -619,26 +651,26 @@ app.MapDelete("/errors/{id}", async (int id, FullStackContext db) =>
 app.MapGet("/activities/{id}", async (int id, FullStackContext db) =>
     await db.Activities.FindAsync(id) is Activitie activitie ? Results.Ok(activitie) : Results.NotFound());
 
-// Endpoint to get activities by time range and robot name
-// Endpoint untuk mendapatkan aktivitas berdasarkan rentang waktu dan nama robot
-app.MapGet("/activities/robot/{robotName}", async (string robotName, DateTimeOffset? startTime, DateTimeOffset? endTime, FullStackContext db) =>
-{
-    IQueryable<Activitie> query = db.Activities.Where(a => a.Robotname == robotName);
-
-    if (startTime.HasValue)
+    // Endpoint to get activities by time range and robot name
+    // Endpoint untuk mendapatkan aktivitas berdasarkan rentang waktu dan nama robot
+    app.MapGet("/activities/robot/{robotName}", async (string robotName, DateTimeOffset? startTime, DateTimeOffset? endTime, FullStackContext db) =>
     {
-        DateTime startTimeValue = startTime.Value.LocalDateTime; // Assign the local time value to a local variable
-        query = query.Where(a => a.Date >= startTimeValue);
-    }
+        IQueryable<Activitie> query = db.Activities.Where(a => a.Robotname == robotName);
 
-    if (endTime.HasValue)
-    {
-        DateTime endTimeValue = endTime.Value.LocalDateTime; // Assign the local time value to a local variable
-        query = query.Where(a => a.Date <= endTimeValue);
-    }
+        if (startTime.HasValue)
+        {
+            DateTime startTimeValue = startTime.Value.LocalDateTime; // Assign the local time value to a local variable
+            query = query.Where(a => a.Date >= startTimeValue);
+        }
 
-    return Results.Ok(await query.ToListAsync());
-});
+        if (endTime.HasValue)
+        {
+            DateTime endTimeValue = endTime.Value.LocalDateTime; // Assign the local time value to a local variable
+            query = query.Where(a => a.Date <= endTimeValue);
+        }
+
+        return Results.Ok(await query.ToListAsync());
+    });
 
 
 // Endpoint to create a new activity

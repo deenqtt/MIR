@@ -7,42 +7,49 @@
     <button @click="clearCanvas" class="btn btn-light">Hapus Canvas</button>
     <div class="d-flex">
       <button @click="confirmBack" class="btn btn-light">Back</button>
-      <button @click="Save" class="btn btn-success">Save</button>
+      <button @click="updatePath" class="btn btn-success">Save</button>
     </div>
     <div class="card bg-light">
       <div class="card-body form-flex">
-        <div class="form-group">
-          <label for="Start">Start</label>
-          <input
-            type="text"
-            readonly
-            class="form-control with-button"
-            v-model="newPath.Start"
-          />
-          <div class="input-group-append">
-            <button class="material-symbols-outlined" @click="setStartPoint">
-              near_me
-            </button>
+        <form @submit.prevent="updatePath">
+          <div class="form-group">
+            <label for="Start">Start</label>
+            <input
+              type="text"
+              class="form-control"
+              v-model="selectedPath.start"
+              required
+            />
+            <div class="input-group-append">
+              <button class="material-symbols-outlined" @click="setStartPoint">
+                near_me
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="Goal">Goal</label>
-          <input
-            type="text"
-            readonly
-            class="form-control with-button"
-            v-model="newPath.Goal"
-          />
-          <div class="input-group-append">
-            <button class="material-symbols-outlined" @click="setGoalPoint">
-              near_me
-            </button>
+          <div class="form-group">
+            <label for="Goal">Goal</label>
+            <input
+              type="text"
+              class="form-control"
+              v-model="selectedPath.goal"
+              required
+            />
+            <div class="input-group-append">
+              <button class="material-symbols-outlined" @click="setGoalPoint">
+                near_me
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="Distance">Distance</label>
-          <input type="text" readonly class="form-control" v-model="distance" />
-        </div>
+          <div class="form-group">
+            <label for="Distance">Distance</label>
+            <input
+              type="text"
+              class="form-control"
+              v-model="selectedPath.distance"
+              required
+            />
+          </div>
+        </form>
       </div>
     </div>
 
@@ -68,16 +75,61 @@ import axios from "axios";
 import { onMounted, ref, reactive } from "vue";
 import { useRouter } from "vue-router"; // Import useRouter
 import Swal from "sweetalert2";
-
-import router from "../../router";
+const router = useRouter();
 const canvas = ref(null);
 const ctx = ref(null);
 const startPoint = ref(null);
 const goalPoint = ref(null);
 const distance = ref(0);
-const newPath = ref({ Start: "", Goal: "" });
+
+const apiUrl = "http://localhost:5258/paths";
+
+const pathId = ref(null); // Accessing route params directly from $route
+const selectedPath = ref({
+  id: null,
+  Start: "",
+  Goal: "",
+  Distance: "",
+});
+
+const fetchPath = async (pathId) => {
+  try {
+    const response = await axios.get(`${apiUrl}/${pathId}`);
+    selectedPath.value = response.data;
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+  }
+};
+
+const updatePath = async () => {
+  try {
+    if (pathId.value) {
+      await axios.put(`${apiUrl}/${pathId.value}`, selectedPath.value);
+      console.log("Path updated:", selectedPath.value);
+      // Tampilkan pesan sukses menggunakan SweetAlert
+      await Swal.fire("Success!", "User Has Been Edited.", "success");
+      router.go(-1); // Navigate back to the user list page after the update
+    } else {
+      console.error("User ID is undefined");
+    }
+  } catch (error) {
+    console.error("Error updating user:", error);
+  }
+};
 
 onMounted(() => {
+  pathId.value = router.currentRoute.value.params.id;
+
+  if (pathId.value) {
+    console.log("Fetching path with ID:", pathId.value);
+    fetchPath(pathId.value);
+  } else {
+    console.error("User ID is undefined");
+  }
+});
+
+onMounted(() => {
+  fetchPath();
   ctx.value = canvas.value.getContext("2d");
 });
 

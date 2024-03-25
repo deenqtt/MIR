@@ -6,53 +6,47 @@
     </h5>
     <br />
     <div v-if="selectedRobot !== ''">
-      <div class="d-flex">
-        <div class="card-name">
-          <div class="card bg-dark">
-            <div class="card-body">
-              <img src="../image/ai.png" alt="roboticon" />
-
-              {{ selectedRobot }}
+      <div class="d-flex justify-content-between">
+        <div class="card bg-light flex" style="width: 30%; border-radius: 15px">
+          <div class="card-body flex">
+            <div
+              class="d-flex justify-content-end align-items-center"
+              style="border-radius: 15px"
+            >
+              <img
+                src="../image/delivery.png"
+                alt=""
+                style="width: 30px; margin-top: 10px; margin-right: 10px"
+              />
             </div>
+            <p class="selectrobot">{{ selectedRobot }}</p>
           </div>
         </div>
-        <div class="informations">
-          <div class="d-flex">
-            <div class="card bg-light">
-              <!-- Add background to the image container -->
-
-              <img src="" alt="" class="colorized-image" />
-            </div>
-            <div class="card bg-primary-subtle">
-              <!-- Add background to the image container -->
-
-              <img src="../image/half.png" alt="" class="colorized-image" />
-            </div>
+        <div class="card" style="width: 30%; border-radius: 15px">
+          <div
+            class="card-body bg-light d-flex justify-content-start align-items-start"
+            style="border-radius: 15px"
+          ></div>
+        </div>
+        <div class="card flex" style="width: 30%; border-radius: 15px">
+          <div
+            class="card-body bg-light d-flex justify-content-end align-items-center"
+            style="border-radius: 15px; margin-right: 20px"
+          >
+            <i
+              class="fa-solid fa-battery-full"
+              style="margin-right: 10px; font-size: 50px"
+            ></i>
           </div>
         </div>
       </div>
       <br />
-      <div class="condition">
-        <div class="card bg-dark">
-          <div class="card-body">
-            <img src="../image/info.png" alt="info" />
-            Condition In Mission ?
-          </div>
-        </div>
-      </div>
-      <br />
-      <br />
-      <br />
-      <div class="card-maps">
-        <div class="card">
-          <div class="card-header">
-            <button class="fa-solid fa-arrow-left arrow-icons"></button
-            ><button class="fa-solid fa-arrow-right"></button>
-          </div>
-          <div class="card-body">
-            <canvas class="canvas" style="width: 100%"></canvas>
-          </div>
-        </div>
+      <div class="card bg-light">
+        <div class="card-header"></div>
+        <div
+          class="card-body"
+          style="border-radius: 0px 0px 10px 10px; box-shadow: inset"
+        ></div>
       </div>
     </div>
     <div v-else class="default-content">
@@ -64,6 +58,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { useStore } from "vuex";
 import { ref, onMounted } from "vue";
@@ -81,39 +76,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.robot-search-container {
+  text-align: center;
+}
 .default-content {
   display: flex;
-  justify-content: center; /* Untuk mengatur konten secara horizontal di tengah */
-  align-items: center; /* Untuk mengatur konten secara vertikal di tengah */
-  /* Menjadikan div seluruh tinggi halaman */
+  justify-content: center;
+  align-items: center;
 }
-
-.robot-search-container {
-  text-align: center; /* Untuk mengatur teks dan gambar berada di tengah secara horizontal */
-}
-
 .robot-search-container img {
-  width: 300px; /* Atur ukuran gambar sesuai kebutuhan */
+  width: 300px;
   margin-bottom: 20px;
   background: none;
   -webkit-filter: drop-shadow(5px 5px 5px #666666);
-  filter: drop-shadow(5px 5px 5px #666666); /* Jarak antara gambar dan teks */
-}
-
-.canvas {
-  border: solid 1px #000000;
-}
-.arrow-icons {
-  margin-right: 20px;
-}
-.fa-solid {
-  border: none;
-  background: none;
+  filter: drop-shadow(5px 5px 5px #666666);
 }
 .container {
   font-family: "Poppins", sans-serif;
-  display: flex;
-  flex-direction: column; /* Menyusun elemen dalam satu kolom */
+}
+.bg-light {
+  box-shadow: #000000 1px 1px 2px;
 }
 h5 {
   font-size: 25px;
@@ -121,68 +103,30 @@ h5 {
   color: #0800ff;
   margin-top: 20px;
 }
-
+.selectrobot {
+  margin-left: 20px;
+  margin-top: -20px;
+  font-weight: 700;
+}
 span {
   font-size: 25px;
   font-weight: 700;
   color: #000000;
-  margin-left: -7px;
-}
-.container .card {
-  border-radius: 20px;
-
-  width: 500px;
-  color: #fff;
-}
-img {
-  width: 8%;
-  margin-right: 20px;
-  background-color: #acacac;
-  padding: 3px;
-  border-radius: 10px;
-}
-.d-flex {
-  gap: 20px;
-}
-.d-flex .informations .bg-light {
-  width: 200px;
-  height: 200px;
-}
-.d-flex .informations .bg-primary-subtle {
-  width: 200px;
-}
-.condition {
-  margin-top: -140px;
-}
-.bg-light {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
-.colorized-image {
-  width: 50%;
-  margin: auto;
-  margin-top: -6px;
-  filter: grayscale(100%);
-  background: none;
-  /* Adjust the filter values as needed to achieve the desired color effect */
-}
-.card-maps .card {
+.card {
+  border: none;
+  margin: 0;
   width: auto;
-  color: #000000;
+  height: 70px;
 }
-.informations {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end; /* Align to the right */
+
+.card-body {
+  padding: 0;
 }
-.informations .d-flex {
-  gap: 20px;
-}
-.informations .bg-light {
-  width: 200px;
-  height: 200px;
-}
-.informations .bg-primary-subtle {
-  width: 200px;
+
+.card img {
+  border-radius: 15px;
 }
 </style>

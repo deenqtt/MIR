@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="login-page">
+    <div class="login-page" :class="{ blur: loading }">
       <h2>LOGIN</h2>
       <div class="card-body shadow-lg bg-light">
         <!-- Form login -->
@@ -51,6 +51,11 @@
         </div>
       </div>
     </div>
+
+    <!-- Loading Screen -->
+    <div v-if="loading || loginSuccess" class="loading-container">
+      <div class="loading"></div>
+    </div>
   </div>
 </template>
 
@@ -64,9 +69,12 @@ const login = ref({ username: "", password: "" });
 const errorMessage = ref("");
 const showPassword = ref(false);
 const isEyeBlinking = ref(false); // Menandakan apakah animasi mata sedang berlangsung
+const loading = ref(false);
+const loginSuccess = ref(false); // Menandakan apakah login berhasil
 
 const loginUser = async () => {
   try {
+    loading.value = true;
     const response = await axios.post(`${apiUrl}/login`, {
       username: login.value.username,
       password: login.value.password,
@@ -79,14 +87,18 @@ const loginUser = async () => {
       localStorage.setItem("token", token);
 
       console.log("Login successful!");
-      // Arahkan pengguna ke halaman dashboard
-      router.push("/dashboard");
+      loginSuccess.value = true; // Set loginSuccess menjadi true
+      setTimeout(() => {
+        router.push("/dashboard"); // Arahkan pengguna ke halaman dashboard setelah 3 detik
+      }, 3000); // Ubah angka sesuai dengan durasi penundaan yang diinginkan
     } else {
       errorMessage.value = "Invalid username or password.";
     }
   } catch (error) {
     errorMessage.value = "Invalid username or password.";
     console.error("An error occurred during login:", error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -177,7 +189,6 @@ h2 {
 .error-message {
   color: red;
   margin-top: 10px;
-  margin-left: 35px;
 }
 
 .btn {
@@ -217,47 +228,34 @@ p {
   color: #ff0000;
 }
 
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .login-page {
-    width: 100%; /* Atur lebar sesuai kebutuhan */
-  }
-
-  .image-container,
-  .form-container {
-    padding: 10px;
-    margin-right: 80px; /* Ubah padding untuk tampilan seluler */
-  }
-
+@media screen and (max-width: 768px) {
   .content {
-    flex-direction: column; /* Tampilan kolom untuk layar kecil */
+    flex-direction: column;
+    align-items: center;
   }
 
-  input,
-  button {
-    width: calc(100% - 20px); /* Ubah lebar input untuk tampilan seluler */
+  .form-container {
+    width: 80%; /* Adjust width for mobile */
+  }
+
+  .image-container {
+    margin-bottom: 20px;
+  }
+
+  .input {
+    width: 100%;
     margin-bottom: 10px;
   }
-
-  p {
-    display: none;
-  }
-
-  .error-message {
-    display: block;
-    font-size: 12px;
-    margin-left: 30px;
+  .input__label {
+    font-size: 14px; /* Increase font size for mobile */
   }
 
   .btn {
-    height: auto;
-    padding: 10px;
-    text-align: center;
-    font-size: 14px;
-    margin: 10px;
+    width: 80%; /* Adjust width for mobile */
+  }
+
+  .error-message {
+    font-size: 12px; /* Decrease font size for mobile */
   }
 }
 
@@ -265,8 +263,7 @@ p {
   max-width: 300px; /* Sesuaikan ukuran gambar */
   max-height: 300px; /* Sesuaikan ukuran gambar */
   margin-top: -60px;
-  /* Menambahkan efek bayangan */
-  transition: transform 0.3s ease; /* Menambahkan efek transisi */
+
   -webkit-filter: drop-shadow(5px 5px 5px #666666);
   filter: drop-shadow(5px 5px 5px #666666);
 }
@@ -316,5 +313,40 @@ p {
   border: none;
   cursor: pointer;
   z-index: 5; /* Tambahkan z-index yang lebih tinggi */
+}
+
+.blur {
+  filter: blur(5px); /* Apply blur effect to the entire page */
+}
+
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* Ensure the loading screen is on top of other elements */
+}
+
+.loading {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 5s linear infinite; /* Apply animation for spinning effect */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

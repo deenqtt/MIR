@@ -76,6 +76,66 @@
         </nav>
       </div>
     </div>
+
+    <!-- Modal untuk edit robot -->
+    <div
+      class="modal fade"
+      id="editRobot"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="editRobotLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editRobotLabel">Edit Robot</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input
+              type="text"
+              class="form-control"
+              v-model="editRobotData.name"
+              placeholder="Name"
+            />
+            <input
+              type="text"
+              class="form-control"
+              v-model="editRobotData.serialnumber"
+              placeholder="Serial Number"
+            />
+            <input
+              type="text"
+              class="form-control"
+              v-model="editRobotData.ip"
+              placeholder="IP"
+            />
+            <input
+              type="text"
+              class="form-control"
+              v-model="editRobotData.domainId"
+              placeholder="Domain ID"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="cancelEdit">
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" @click="editRobot">
+              Save changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -151,10 +211,27 @@ const editRobot = async () => {
     await axios.put(`${apiUrl}/${editRobotData.value.id}`, editRobotData.value);
     fetchRobots();
     await Swal.fire("Success!", "Changes saved successfully!", "success");
-    $("#editRobot").modal("hide");
+    $("#editRobot").modal("hide"); // Menutup modal secara otomatis
   } catch (error) {
     errorMessage.value = "Failed to save changes: " + error.message;
   }
+};
+
+const cancelEdit = () => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You will lose any unsaved changes!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, cancel!",
+    cancelButtonText: "No, continue editing",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $("#editRobot").modal("hide"); // Menutup modal jika pengguna mengkonfirmasi pembatalan
+    }
+  });
 };
 
 const prevPage = () => {

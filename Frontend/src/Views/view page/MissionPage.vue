@@ -107,14 +107,6 @@
     </div>
     <div class="d-flex button-flex">
       <button
-        type="submit"
-        @click="submitForm"
-        class="btn btn-success"
-        v-if="showCreateForm"
-      >
-        Create Mission
-      </button>
-      <button
         v-if="showCreateForm"
         type="button"
         class="btn btn-light"
@@ -168,6 +160,9 @@
           </select>
         </div>
       </div>
+      <button type="submit" class="btn btn-success" v-if="showCreateForm">
+        Create Mission
+      </button>
     </form>
   </div>
 </template>
@@ -176,8 +171,9 @@
 import axios from "axios";
 import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 import Swal from "sweetalert2";
-
+const store = useStore(); // Mengakses store Vuex di dalam setup
 const showCreateForm = ref(false);
 const missions = ref([]);
 const router = useRouter();
@@ -288,27 +284,33 @@ const submitForm = async () => {
     if (
       !newMission.value.Name ||
       !newMission.value.Group ||
-      !newMission.value.Robot ||
+      !newMission.value.Robot || // Pastikan parameter 'robot' disertakan
       !newMission.value.Site
     ) {
-      // Show an alert or set an error message indicating that the form is incomplete
+      // Tampilkan pesan kesalahan jika formulir tidak lengkap
       window.alert("Please fill in all fields.");
       return;
     }
-    const response = await axios.post(apiUrll, newMission.value);
+    const response = await axios.post(apiUrll, newMission.value); // Ganti apiUrl dengan URL yang benar
     console.log("Success:", response.data); // Log response jika input berhasil
     const missionsResponse = await axios.get(apiUrl);
     missions.value = missionsResponse.data;
-    // Clear the form fields after successful submission
+    store.commit("addNotification", {
+      message: "New mission created: " + newMission.value.Name,
+      type: "success",
+    });
+
+    // Bersihkan formulir setelah pengiriman berhasil
     newMission.value = { Name: "", Site: "", Group: "", Robot: "" };
     await Swal.fire("Success!", "Mission successfully created!", "success");
-    // Redirect to "/Mission/Created/New"
+    // Redirect ke "/Mission/Created/New"
     router.push("/Mission/Created/New");
   } catch (error) {
     console.error("Error:", error); // Log error jika terjadi kesalahan
     errorMessage.value = "Failed to create mission: " + error.message;
   }
 };
+
 const cancelForm = () => {
   // Reset form and navigate back to the list view
   newMission.value = {

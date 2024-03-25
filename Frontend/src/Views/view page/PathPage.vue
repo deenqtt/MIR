@@ -213,7 +213,7 @@
               data-dismiss="modal"
               aria-label="Close"
             >
-              <span aria-hidden="true">&times;</span>
+              <span aria-hidden="true" data-dismiss="modal">&times;</span>
             </button>
           </div>
           <div class="modal-body">
@@ -519,9 +519,16 @@ const calculateDistance = () => {
 };
 
 const editPath = (path) => {
-  // Redirect ke halaman edit dengan ID path yang dipilih
-  router.push({ name: "edit-path", params: { id: path.id } });
+  // Log the username before navigating to the edit page
+  console.log("Editing Path:", path.name);
+
+  // Use router to navigate to "/edit" and pass the user data as a parameter
+  router.push({
+    name: "edit-path",
+    params: { id: path.id },
+  });
 };
+
 onMounted(() => {
   fetchPaths();
   fetchMaps();

@@ -58,7 +58,7 @@
         >
         </lord-icon>
         <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
-        <span class="notification-dot" v-if="hasUnreadNotifications"></span>
+        <span class="notification-dot" v-if="hasNewInputError"></span>
       </router-link>
       <router-link
         to="/settings"
@@ -118,7 +118,7 @@ import store from "../store";
 const router = useRouter();
 const is_expanded = ref(false);
 const is_mobile = ref(false);
-const hasUnreadNotifications = computed(() => {
+const hasNewInputError = computed(() => {
   // Ambil nilai properti unreadNotifications dari store
   const unreadNotifications = store.state.unreadNotifications;
   // Tentukan apakah ada notifikasi yang belum dibaca
@@ -129,7 +129,7 @@ const handleNotificationClick = () => {
   store.commit("markAllNotificationsAsRead");
 
   // Menyembunyikan ikon notifikasi saat diklik
-  hasUnreadNotifications.value = false;
+  hasNewInputError.value = false;
 };
 
 const checkWindowSize = () => {

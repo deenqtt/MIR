@@ -201,10 +201,6 @@ function selectRobot(robot) {
   fetchActivities(robot);
 }
 
-onMounted(() => {
-  fetchRobots();
-});
-
 function formatTime(dateString) {
   const date = new Date(dateString);
   return `${date.getHours()}:${date.getMinutes()}`;
@@ -224,6 +220,9 @@ function applyFilter() {
   }
   hideFilterModal();
 }
+onMounted(() => {
+  fetchRobots();
+});
 </script>
 
 <style scoped>

@@ -21,17 +21,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: "/",
-      name: "",
-    },
-    {
       path: "/auth/register",
       name: "Register",
       component: Register,
       meta: { requiresAuth: true },
     },
     {
-      path: "/auth/login",
+      path: "/",
       name: "Login",
       component: Loginform,
       meta: {
@@ -115,11 +111,7 @@ const router = createRouter({
       Name: "New",
       component: () => import("../Views/created page/createdMaps.vue"),
     },
-    {
-      path: "/test",
-      Name: "tet",
-      component: () => import("../Views/test/test.vue"),
-    },
+
     {
       path: "/Mission/Created/New",
       Name: "Miss",
@@ -169,18 +161,38 @@ const router = createRouter({
 
 // Sebelum pengguna berhasil login
 router.beforeEach((to, from, next) => {
-  // Cek apakah route memerlukan otentikasi dan pengguna belum terotentikasi
-  if (to.meta.requiresAuth && !isAuthenticated()) {
-    // Jika tidak, arahkan ke halaman login
-    next({ name: "Login" });
-  } else if (to.name === "Login" || to.name === "Register") {
-    // Jika pengguna sudah login dan mencoba mengakses halaman login atau register
+  // Jika pengguna sudah login dan mencoba mengakses halaman login
+  if (isAuthenticated() && to.name === "Login") {
     // Arahkan mereka ke halaman dashboard atau halaman lain yang sesuai
-    isAuthenticated() ? next({ name: "Dashboard" }) : next();
+    next({ name: "Dashboard" }); // Ganti "Dashboard" dengan nama halaman tujuan yang sesuai
+  } else if (to.meta.requiresAuth && !isAuthenticated()) {
+    // Jika route memerlukan otentikasi dan pengguna belum terotentikasi
+    // Arahkan ke halaman login
+    next({ name: "Login" });
+  } else if (!isAuthenticated() && to.name === "Register") {
+    // Jika pengguna belum login dan mencoba mengakses halaman register
+    // Arahkan mereka ke halaman register
+    next();
   } else {
     // Jika terotentikasi atau route tidak memerlukan otentikasi, lanjutkan navigasi
     next();
   }
 });
+
+// Sebelum pengguna berhasil login
+// router.beforeEach((to, from, next) => {
+//   // Cek apakah route memerlukan otentikasi dan pengguna belum terotentikasi
+//   if (to.meta.requiresAuth && !isAuthenticated()) {
+//     // Jika tidak, arahkan ke halaman login
+//     next({ name: "Login" });
+//   } else if (!isAuthenticated() && to.name === "Register") {
+//     // Jika pengguna belum login dan mencoba mengakses halaman register
+//     // Arahkan mereka ke halaman register
+//     next();
+//   } else {
+//     // Jika terotentikasi atau route tidak memerlukan otentikasi, lanjutkan navigasi
+//     next();
+//   }
+// });
 
 export default router;
