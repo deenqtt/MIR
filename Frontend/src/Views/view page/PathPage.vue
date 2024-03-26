@@ -256,6 +256,15 @@ const selectedPoint = reactive({ x: null, y: null });
 const isSelectingStart = ref(true);
 const selectedPath = reactive({});
 const submitForm = async () => {
+  if (!validateForm()) {
+    // Jika validasi gagal, munculkan Sweet Alert
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Please fill in all fields!",
+    });
+    return;
+  }
   try {
     const response = await axios.post(apiUrl, newPath.value);
     console.log(response.data);
@@ -282,7 +291,16 @@ const submitForm = async () => {
     errorMessage.value = "Failed to create map: " + error.message;
   }
 };
-
+const validateForm = () => {
+  // Lakukan validasi di sini
+  return (
+    newPath.Name &&
+    newPath.Map &&
+    newPath.Start &&
+    newPath.Goal &&
+    newPath.Distance
+  );
+};
 const cancelForm = async () => {
   const confirmCancel = await Swal.fire({
     title: "Are you sure?",

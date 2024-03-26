@@ -24,7 +24,9 @@ const router = createRouter({
       path: "/auth/register",
       name: "Register",
       component: Register,
-      meta: { requiresAuth: true },
+      meta: {
+        requiresAuth: false,
+      },
     },
     {
       path: "/",
@@ -44,90 +46,107 @@ const router = createRouter({
       path: "/maps",
       name: "Maps",
       component: Maps,
+      meta: { requiresAuth: true },
     },
     {
       path: "/path",
       name: "Path",
       component: Path,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Activity",
       name: "Activity",
       component: Activity,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Error Log",
       name: "Error Log",
       component: ErrorLog,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Error",
       name: "Error",
       component: Error,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Add Robot",
       name: "Add Robot",
       component: AddRobot,
+      meta: { requiresAuth: true },
     },
     {
       path: "/System",
       name: "System",
       component: System,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Robot",
       name: "Robot",
       component: Robot,
+      meta: { requiresAuth: true },
     },
     {
       path: "/User",
       name: "User",
       component: User,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Modul",
       name: "Modul",
       component: Modul,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Mission",
       name: "Mission",
       component: Mission,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Footprint",
       name: "Footprint",
       component: Footprint,
+      meta: { requiresAuth: true },
     },
 
     {
       path: "/settings",
       name: "Settings",
       component: Settings,
+      meta: { requiresAuth: true },
     },
     {
       path: "/Maps/Created/New",
       Name: "New",
       component: () => import("../Views/created page/createdMaps.vue"),
+      meta: { requiresAuth: true },
     },
 
     {
       path: "/Mission/Created/New",
       Name: "Miss",
       component: () => import("../Views/created page/CreatedMission.vue"),
+      meta: { requiresAuth: true },
     },
     {
       path: "/edit-path/:id",
       name: "edit-path",
       component: () => import("../Views/edit page/EditPath.vue"),
       props: true,
+      meta: { requiresAuth: true },
     },
     {
       path: "/edit-mission/:id",
       name: "edit-mission",
       component: () => import("../Views/edit page/EditMission.vue"),
       props: true,
+      meta: { requiresAuth: true },
     },
     {
       path: "/edit-map/:id",
@@ -145,16 +164,19 @@ const router = createRouter({
       path: "/footprint/edit/:id", // Sesuaikan sesuai kebutuhan Anda
       name: "edit-footprint",
       component: () => import("../Views/edit page/EditFoot.vue"),
+      meta: { requiresAuth: true },
     },
     {
       path: "/Canvas",
       name: "Canvas",
       component: () => import("../Views/test/canvas.vue"),
+      meta: { requiresAuth: true },
     },
     {
       path: "/coice",
       name: "c",
       component: () => import("../Views/test/choice.vue"),
+      meta: { requiresAuth: true },
     },
   ],
 });
@@ -178,21 +200,5 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
-// Sebelum pengguna berhasil login
-// router.beforeEach((to, from, next) => {
-//   // Cek apakah route memerlukan otentikasi dan pengguna belum terotentikasi
-//   if (to.meta.requiresAuth && !isAuthenticated()) {
-//     // Jika tidak, arahkan ke halaman login
-//     next({ name: "Login" });
-//   } else if (!isAuthenticated() && to.name === "Register") {
-//     // Jika pengguna belum login dan mencoba mengakses halaman register
-//     // Arahkan mereka ke halaman register
-//     next();
-//   } else {
-//     // Jika terotentikasi atau route tidak memerlukan otentikasi, lanjutkan navigasi
-//     next();
-//   }
-// });
 
 export default router;

@@ -56,9 +56,7 @@
                 <br />
                 <span
                   >Have an account??
-                  <router-link to="/auth/login" class="router"
-                    >Login</router-link
-                  ></span
+                  <router-link to="/" class="router">Login</router-link></span
                 >
               </div>
             </form>
@@ -137,7 +135,7 @@ const createUser = async () => {
     const response = await axios.post(apiUrl, newUser.value);
     // Reset newUser fields to empty after successful registration
     newUser.value = { username: "", password: "", phone: "" };
-    router.push("/auth/login");
+    router.push("/");
   } catch (error) {
     errorMessage.value = "Failed to create user: " + error.message;
   }

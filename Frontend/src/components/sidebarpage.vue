@@ -106,6 +106,9 @@
         ></span>
       </button>
     </div>
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
   </aside>
 </template>
 
@@ -115,6 +118,8 @@ import { useRouter } from "vue-router";
 import { removeAuthToken } from "../router/auth";
 import { useStore } from "vuex";
 import store from "../store";
+
+const loading = ref(false);
 const router = useRouter();
 const is_expanded = ref(false);
 const is_mobile = ref(false);
@@ -138,17 +143,20 @@ const checkWindowSize = () => {
 const ToggleMenu = () => {
   is_expanded.value = !is_expanded.value;
 };
-const logout = () => {
-  // Menutup tooltip sebelum melakukan logout
-  $('[data-toggle="tooltip"]').tooltip("hide");
+const logout = async () => {
+  // Menampilkan animasi loading dan menerapkan efek blur pada latar belakang
+  loading.value = true;
+  document.body.style.overflow = "hidden"; // Menghilangkan scroll pada latar belakang
+
+  // Menunda navigasi ke halaman berikutnya selama 3 detik
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
   // Membersihkan status autentikasi dari localStorage menggunakan fungsi dari auth.js
   removeAuthToken();
 
-  // Mengarahkan pengguna kembali ke halaman login
+  // Mengarahkan pengguna kembali ke halaman login setelah selesai logout
   router.push({ name: "Login" });
 };
-
 const onButtonHover = () => {
   console.log("Button hovered");
 };
@@ -164,6 +172,42 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+/* Gaya untuk elemen animasi loading */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Latar belakang semi-transparan */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Pastikan di atas konten lainnya */
+}
+
+.loading-spinner {
+  border: 8px solid #f3f3f3; /* Light grey */
+  border-top: 8px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite; /* Animasi putar */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efek blur untuk latar belakang saat animasi loading aktif */
+.loading-overlay + .is-expanded {
+  filter: blur(5px);
+}
 .notification-dot {
   position: absolute;
   width: 10px;

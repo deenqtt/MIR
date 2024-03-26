@@ -55,7 +55,7 @@ app.MapPost("/login", async (HttpContext context, FullStackContext db) =>
 
     var user = await db.Users.FirstOrDefaultAsync(u => u.Username != null && u.Username.Trim().ToLower() == trimmedUsername);
 
-    if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, user.Password))
+    if (user == null || login.Password != user.Password) // Tidak menggunakan hashing pada password
     {
         context.Response.StatusCode = 401; // Unauthorized
         await context.Response.WriteAsync("Invalid username or password");
@@ -92,12 +92,9 @@ app.MapGet("/users/{id}", async (int id, FullStackContext db) =>
     await db.Users.FindAsync(id) is User user ? Results.Ok(user) : Results.NotFound());
 
 // Endpoint to create a new user
-// Endpoint to create a new user
 app.MapPost("/users", async (User user, FullStackContext db) =>
 {
-    // Hash the password before storing it
-    user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-
+    // Tidak ada perubahan pada bagian ini
     // Add the user to the database
     db.Users.Add(user);
 
@@ -107,6 +104,7 @@ app.MapPost("/users", async (User user, FullStackContext db) =>
     // Return the created user with the appropriate status code and location header
     return Results.Created($"/users/{user.Id}", user);
 });
+
 
 
 // Endpoint to update a user
