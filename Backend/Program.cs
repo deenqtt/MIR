@@ -218,15 +218,18 @@ app.MapPost("/maps", async (Map map, FullStackContext db) =>
 {
     // Tambahkan map ke database
     db.Maps.Add(map);
+     DateTime utcNow = DateTime.UtcNow;
 
-    // Simpan perubahan ke database
-    await db.SaveChangesAsync();
+    // Mendapatkan zona waktu Jakarta
+    TimeZoneInfo jakartaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"); // Waktu Indonesia Barat (WIB)
 
+    // Konversi waktu UTC menjadi waktu Jakarta
+    DateTime jakartaTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, jakartaTimeZone);
     // Tambahkan entri ke tabel Activities dengan data yang sesuai
     var activity = new Activitie
     {
         Robotname =  map.Creator,
-        Date = DateTime.Now,
+        Date = jakartaTime,
         Activity = $"Added 1 new map: { map.Name}"
     };
 
@@ -307,12 +310,19 @@ app.MapPost("/missions", async (Mission mission, FullStackContext db) =>
 
     // Simpan perubahan ke database
     await db.SaveChangesAsync();
+   // Mendapatkan waktu saat ini dalam zona waktu UTC
+    DateTime utcNow = DateTime.UtcNow;
 
+    // Mendapatkan zona waktu Jakarta
+    TimeZoneInfo jakartaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"); // Waktu Indonesia Barat (WIB)
+
+    // Konversi waktu UTC menjadi waktu Jakarta
+    DateTime jakartaTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, jakartaTimeZone);
     // Tambahkan entri ke tabel Activities dengan data yang sesuai
     var activity = new Activitie
     {
         Robotname = mission.Robot,
-        Date = DateTime.UtcNow, // Menggunakan UTC untuk tanggal dan waktu
+        Date = jakartaTime, // Menggunakan UTC untuk tanggal dan waktu
         Activity = $"Added 1 new mission: {mission.Name}"
     };
 
@@ -595,24 +605,31 @@ app.MapPost("/errors", async (Error error, FullStackContext db) =>
     // Add the error to the database
     db.Errors.Add(error);
 
+    // Mendapatkan waktu saat ini dalam zona waktu UTC
+    DateTime utcNow = DateTime.UtcNow;
+
+    // Mendapatkan zona waktu Jakarta
+    TimeZoneInfo jakartaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"); // Waktu Indonesia Barat (WIB)
+
+    // Konversi waktu UTC menjadi waktu Jakarta
+    DateTime jakartaTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, jakartaTimeZone);
+
     // Create a new activity entry based on the error information
     var newActivity = new Activitie
     {
         Robotname = error.Robotname,
-       Date = DateTime.UtcNow, // Gunakan tanggal dan waktu saat ini
+        Date = jakartaTime, // Menggunakan tanggal dan waktu sesuai dengan WIB
         Activity = $"Error occurred: {error.Explained}"
     };
 
     // Set expiry date 24 jam setelah waktu input
     newActivity.ExpiryTime = newActivity.Date.AddHours(24);
 
-
     // Tambahkan aktivitas ke database
     db.Activities.Add(newActivity);
 
     // Simpan perubahan ke database
     await db.SaveChangesAsync();
-
 
     // Return the created error with the appropriate status code and location header
     return Results.Created($"/errors/{error.Id}", error);

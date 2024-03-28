@@ -29,6 +29,14 @@
               v-model="selectedUser.phone"
             />
           </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              v-model="selectedUser.password"
+            />
+          </div>
           <div>
             <button type="submit" class="btn btn-primary">Update</button>
           </div>
@@ -47,8 +55,9 @@ const router = useRouter();
 const userId = ref(null);
 const selectedUser = ref({
   id: null,
-  name: "",
+  username: "",
   phone: "",
+  password: "",
 });
 
 const apiUrl = "http://localhost:5258/users";

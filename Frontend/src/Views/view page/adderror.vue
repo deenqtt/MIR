@@ -91,7 +91,6 @@ const onSubmit = async () => {
 
     // Jika pesan kesalahan berhasil dikirim, tambahkan notifikasi ke toko Vuex
     store.commit("addNotification", {
-      message: "Error Successfully Sent!",
       read: false, // Set notifikasi sebagai belum dibaca
     });
 

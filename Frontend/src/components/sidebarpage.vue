@@ -1,115 +1,126 @@
 <template>
-  <aside
-    :class="`${is_expanded ? 'is-expanded' : ''} ${
-      is_mobile ? 'is-mobile' : ''
-    }`"
-  >
-    <br /><br />
-    <div class="menu">
-      <div class="menu1">
+  <div class="sidebar">
+    <button class="hamburger-button" @click="toggleSidebar">
+      <!-- Icon bars di sini -->
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <aside
+      :class="`${is_expanded ? 'is-expanded' : ''} ${
+        is_mobile ? 'is-mobile' : ''
+      }`"
+    >
+      <!-- Tombol untuk menyembunyikan sidebar -->
+      <button v-if="is_expanded" class="close-button" @click="toggleSidebar">
+        <i class="fa-solid fa-times"></i>
+      </button>
+      <br /><br />
+      <div class="menu">
+        <div class="menu1">
+          <router-link
+            to="/dashboard"
+            class="button"
+            :class="{ active: $route.path === '/dashboard' }"
+          >
+            <lord-icon
+              class="fa-solid"
+              src="https://cdn.lordicon.com/wmwqvixz.json"
+              trigger="hover"
+              colors="primary:#ffffff"
+              data-toggle="tooltip"
+              data-bs-placement="right"
+              title="Dashboard"
+            >
+            </lord-icon>
+          </router-link>
+        </div>
         <router-link
-          to="/dashboard"
+          to="/maps"
           class="button"
-          :class="{ active: $route.path === '/dashboard' }"
+          :class="{ active: $route.path === '/maps' }"
         >
           <lord-icon
             class="fa-solid"
-            src="https://cdn.lordicon.com/wmwqvixz.json"
+            src="https://cdn.lordicon.com/omiqopzf.json"
             trigger="hover"
             colors="primary:#ffffff"
             data-toggle="tooltip"
             data-bs-placement="right"
-            title="Dashboard"
+            title="Setup"
+          >
+          </lord-icon>
+        </router-link>
+        <!-- Sisipkan event mouseenter dan mouseleave untuk menampilkan dan menyembunyikan tooltip -->
+        <router-link
+          to="/activity"
+          class="button"
+          :class="{ active: $route.path === '/activity' }"
+          @click="handleNotificationClick"
+        >
+          <lord-icon
+            class="fa-solid"
+            src="https://cdn.lordicon.com/uwinmnkh.json"
+            trigger="hover"
+            colors="primary:#ffffff"
+            data-toggle="tooltip"
+            data-bs-placement="right"
+            title="Monitoring"
+          >
+          </lord-icon>
+          <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
+          <span class="notification-dot" v-if="hasNewInputError"></span>
+        </router-link>
+        <router-link
+          to="/settings"
+          class="button"
+          :class="{ active: $route.path === '/settings' }"
+        >
+          <lord-icon
+            src="https://cdn.lordicon.com/ifsxxxte.json"
+            trigger="hover"
+            colors="primary:#ffffff"
+            class="fa-solid"
+            data-toggle="tooltip"
+            data-bs-placement="right"
+            title="System"
           >
           </lord-icon>
         </router-link>
       </div>
-      <router-link
-        to="/maps"
-        class="button"
-        :class="{ active: $route.path === '/maps' }"
-      >
-        <lord-icon
-          class="fa-solid"
-          src="https://cdn.lordicon.com/omiqopzf.json"
-          trigger="hover"
-          colors="primary:#ffffff"
-          data-toggle="tooltip"
-          data-bs-placement="right"
-          title="Setup"
-        >
-        </lord-icon>
-      </router-link>
-      <!-- Sisipkan event mouseenter dan mouseleave untuk menampilkan dan menyembunyikan tooltip -->
-      <router-link
-        to="/activity"
-        class="button"
-        :class="{ active: $route.path === '/activity' }"
-        @click="handleNotificationClick"
-      >
-        <lord-icon
-          class="fa-solid"
-          src="https://cdn.lordicon.com/uwinmnkh.json"
-          trigger="hover"
-          colors="primary:#ffffff"
-          data-toggle="tooltip"
-          data-bs-placement="right"
-          title="Monitoring"
-        >
-        </lord-icon>
-        <!-- Menampilkan titik hijau hanya jika ada notifikasi yang belum dibaca -->
-        <span class="notification-dot" v-if="hasNewInputError"></span>
-      </router-link>
-      <router-link
-        to="/settings"
-        class="button"
-        :class="{ active: $route.path === '/settings' }"
-      >
-        <lord-icon
-          src="https://cdn.lordicon.com/ifsxxxte.json"
-          trigger="hover"
-          colors="primary:#ffffff"
-          class="fa-solid"
-          data-toggle="tooltip"
-          data-bs-placement="right"
-          title="System"
-        >
-        </lord-icon>
-      </router-link>
-    </div>
 
-    <div class="flex"></div>
+      <div class="flex"></div>
 
-    <div class="menu">
-      <router-link
-        to="/Robot"
-        class="button"
-        :class="{ active: $route.path === '/Robot' }"
-      >
-        <lord-icon
-          class="fa-solid"
-          src="https://cdn.lordicon.com/ojnjgkun.json"
-          trigger="hover"
-          colors="primary:#ffffff"
-          data-toggle="tooltip"
-          data-bs-placement="right"
-          title="Help"
+      <div class="menu">
+        <router-link
+          to="/Robot"
+          class="button"
+          :class="{ active: $route.path === '/Robot' }"
         >
-        </lord-icon>
-      </router-link>
-      <button class="tombol" @click="logout">
-        <span
-          class="fa-solid fa-right-from-bracket custom-tooltip"
-          data-toggle="tooltip"
-          data-bs-placement="right"
-          title="Logout"
-        ></span>
-      </button>
-    </div>
-    <div v-if="loading" class="loading-overlay">
-      <div class="loading-spinner"></div>
-    </div>
-  </aside>
+          <lord-icon
+            class="fa-solid"
+            src="https://cdn.lordicon.com/ojnjgkun.json"
+            trigger="hover"
+            colors="primary:#ffffff"
+            data-toggle="tooltip"
+            data-bs-placement="right"
+            title="Help"
+          >
+          </lord-icon>
+        </router-link>
+        <button class="tombol" @click="logout">
+          <span
+            class="fa-solid fa-right-from-bracket custom-tooltip"
+            data-toggle="tooltip"
+            data-bs-placement="right"
+            title="Logout"
+          ></span>
+        </button>
+      </div>
+      <div v-if="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
+      <div v-if="is_mobile && is_expanded" class="background-overlay"></div>
+    </aside>
+  </div>
 </template>
 
 <script setup>
@@ -118,11 +129,9 @@ import { useRouter } from "vue-router";
 import { removeAuthToken } from "../router/auth";
 import { useStore } from "vuex";
 import store from "../store";
-
 const loading = ref(false);
 const router = useRouter();
-const is_expanded = ref(false);
-const is_mobile = ref(false);
+
 const hasNewInputError = computed(() => {
   // Ambil nilai properti unreadNotifications dari store
   const unreadNotifications = store.state.unreadNotifications;
@@ -137,9 +146,6 @@ const handleNotificationClick = () => {
   hasNewInputError.value = false;
 };
 
-const checkWindowSize = () => {
-  is_mobile.value = window.innerWidth <= 660;
-};
 const ToggleMenu = () => {
   is_expanded.value = !is_expanded.value;
 };
@@ -160,7 +166,21 @@ const logout = async () => {
 const onButtonHover = () => {
   console.log("Button hovered");
 };
+// Definisikan variabel is_expanded dan is_mobile
+const is_expanded = ref(false);
+const is_mobile = ref(window.innerWidth <= 660); // Inisialisasi dengan nilai berdasarkan ukuran layar saat ini
 
+// Definisikan fungsi untuk menampilkan/menyembunyikan sidebar pada tampilan ponsel
+const toggleSidebar = () => {
+  is_expanded.value = !is_expanded.value;
+};
+
+// Pastikan fungsi ini dipanggil ketika ukuran jendela berubah
+const checkWindowSize = () => {
+  is_mobile.value = window.innerWidth <= 660; // Atur batas ukuran untuk menentukan apakah itu ponsel atau bukan
+};
+
+// Dipanggil saat komponen dimuat
 onMounted(() => {
   checkWindowSize();
   window.addEventListener("resize", checkWindowSize);
@@ -172,6 +192,85 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+/* Atur tampilan latar belakang saat sidebar diperluas pada tampilan ponsel */
+.is-expanded .background-overlay {
+  display: block; /* Tampilkan latar belakang saat sidebar diperluas */
+}
+
+.close-button {
+  position: fixed; /* Tetapkan posisi tetap agar tombol close selalu terlihat */
+  top: 20px; /* Atur posisi ke bawah dari atas */
+  left: 220px; /* Atur posisi ke kiri dari kiri */
+  z-index: 9999; /* Tetapkan z-index tinggi untuk menempatkan tombol di atas elemen lain */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.is-expanded {
+  width: 240px; /* Atur lebar sidebar yang diperluas */
+  transition: width 0.3s ease; /* Tambahkan transisi agar perubahan lebar menjadi mulus */
+}
+
+/* Atur tampilan untuk tombol close saat sidebar diperluas */
+.is-expanded .close-button {
+  display: block; /* Tampilkan tombol close saat sidebar diperluas */
+}
+
+.hamburger-button {
+  position: fixed; /* Tetapkan posisi tetap agar tombol hamburger selalu terlihat */
+  display: none; /* Atur posisi ke bawah dari atas */
+  left: 10px; /* Atur posisi ke kiri dari kiri */
+  z-index: 9999; /* Tetapkan z-index tinggi untuk menempatkan tombol di atas elemen lain */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.fa-times {
+  color: #ffff;
+}
+
+/* Gaya untuk latar belakang blur/gelap */
+.background-overlay {
+  position: fixed; /* Tetapkan posisi absolut agar latar belakang menutupi seluruh layar */
+  top: 0; /* Tempatkan latar belakang di bagian atas */
+  left: 0; /* Tempatkan latar belakang di sisi kiri */
+  width: 100%; /* Atur lebar latar belakang */
+  height: 100%; /* Atur tinggi latar belakang */
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99909; /* Tetapkan z-index sedikit lebih rendah dari sidebar agar tidak menutupinya */
+  display: none; /* Sembunyikan secara default */
+}
+/* Gaya untuk ikon bars */
+.fa-bars {
+  color: #000000; /* Ubah warna ikon menjadi putih */
+}
+/* Atur tampilan hamburger untuk tampilan ponsel */
+@media screen and (max-width: 660px) {
+  .hamburger-button {
+    display: block; /* Tampilkan tombol hamburger pada tampilan ponsel */
+  }
+  .close-button {
+    display: none; /* Sembunyikan tombol close secara default */
+  }
+  /* Sembunyikan sidebar saat tombol hamburger tidak aktif */
+  .is-mobile {
+    display: none;
+  }
+  aside {
+    position: absolute; /* Tetapkan posisi absolut agar sidebar berada di atas komponen lain */
+    top: 0; /* Tempatkan sidebar di bagian atas */
+    left: 0; /* Tempatkan sidebar di sisi kiri */
+    bottom: 0;
+    z-index: 999999; /* Biarkan sidebar menutupi seluruh ketinggian layar */
+  }
+  /* Atur tampilan sidebar saat tombol hamburger aktif */
+  .is-mobile.is-expanded {
+    display: block;
+  }
+}
 /* Gaya untuk elemen animasi loading */
 .loading-overlay {
   position: fixed;
@@ -231,30 +330,6 @@ onBeforeUnmount(() => {
 }
 .custom-tooltip.tooltip-inner {
   background-color: blue; /* Ubah warna latar belakang menjadi biru */
-}
-
-/* Styling for mobile view */
-.is-mobile {
-  width: 30px;
-  height: 100%;
-  z-index: 100;
-  overflow-y: auto;
-
-  .menu {
-    position: fixed;
-
-    flex-direction: column;
-  }
-
-  .button {
-    border-right: none !important;
-  }
-
-  h3,
-  .text {
-    display: inline-block;
-    margin-left: 1rem;
-  }
 }
 
 aside {
