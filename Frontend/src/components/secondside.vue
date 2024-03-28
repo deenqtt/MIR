@@ -8,6 +8,19 @@
               <i class="navbar-brand" href="#">GSPE Company</i>
             </li>
           </div>
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="flexSwitchCheckDefault"
+              v-model="isChecked"
+              @change="handleCheckboxChange"
+            />
+            <label class="form-check-label" for="flexSwitchCheckDefault"
+              >Mqtt</label
+            >
+          </div>
+
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <li class="nav-item">
               <button class="play-pause-btn" @click="togglePlayPause">
@@ -195,6 +208,21 @@ import axios from "axios";
 import { ref, onMounted, watch, toRefs, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { connect, disconnect } from "../router/mqtt.js";
+
+// Inisialisasi variabel reactive untuk menyimpan status checkbox
+const isChecked = ref(false);
+
+// Fungsi untuk menangani perubahan pada checkbox
+const handleCheckboxChange = () => {
+  if (isChecked.value) {
+    // Jika checkbox dicentang, panggil fungsi connect
+    connect();
+  } else {
+    // Jika checkbox tidak dicentang, panggil fungsi disconnect
+    disconnect();
+  }
+};
 const missionOptions = ref([]);
 const activeSubMenu = ref("");
 const store = useStore();
@@ -385,6 +413,21 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.form-check-input:checked {
+  background-color: #28a745; /* Warna hijau saat tombol dicentang (checked) */
+  border-color: #28a745; /* Warna garis pinggir hijau */
+}
+
+.form-check-input:checked + .form-check-label {
+  color: #28a745; /* Warna teks hijau saat tombol dicentang (checked) */
+}
+
+.form-check {
+  margin-left: 20px;
+  margin-top: 20px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+}
 .submenu-item .fa-submenu {
   margin-right: -10px;
 }

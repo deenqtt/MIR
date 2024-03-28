@@ -16,7 +16,10 @@ import AddRobot from "../Views/view page/AddNew.vue";
 import Settings from "../Views/view page/SettingsPage.vue";
 import ErrorLog from "../Views/view page/Errorpage.vue";
 import Error from "../Views/view page/adderror.vue";
-
+import Battery from "../Views/setting/batterypage.vue";
+import ErrorHand from "../Views/setting/errorhandling.vue";
+import Feature from "../Views/setting/inforobot.vue";
+import Docking from "../Views/setting/docking.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -119,6 +122,30 @@ const router = createRouter({
       path: "/settings",
       name: "Settings",
       component: Settings,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/battery",
+      name: "battery",
+      component: Battery,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/error handling",
+      name: "errorhan",
+      component: ErrorHand,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/docking",
+      name: "docking",
+      component: Docking,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/feature",
+      name: "feature",
+      component: Feature,
       meta: { requiresAuth: true },
     },
     {

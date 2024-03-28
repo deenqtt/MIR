@@ -18,6 +18,10 @@
         <i v-if="card.hover" :class="card.icon"></i>
       </div>
     </router-link>
+
+    <div class="cardinformation">
+      <div class="card bg-light"></div>
+    </div>
   </div>
 </template>
 
@@ -26,64 +30,28 @@ import { ref, onMounted } from "vue";
 
 const cards = ref([
   {
-    title: "System",
+    title: "Error Handling",
     hover: false,
     icon: "fas fa-cogs",
     // tooltip: "Tooltip for System",
   },
   {
-    title: "Lorem",
+    title: "Battery",
     hover: false,
-    icon: "fas fa-globe",
+    icon: "fa-solid fa-battery-quarter",
     // tooltip: "Tooltip for Lorem",
   },
   {
-    title: "Lorem",
+    title: "Docking",
     hover: false,
     icon: "fas fa-chart-bar",
     // tooltip: "Tooltip for Lorem",
   },
   {
-    title: "Lorem",
+    title: "Feature",
     hover: false,
-    icon: "fas fa-envelope",
+    icon: "fas fa-chart-bar",
     // tooltip: "Tooltip for Lorem",
-  },
-  {
-    title: "Another Page",
-    hover: false,
-    icon: "fas fa-info-circle",
-    // tooltip: "Tooltip for Another Page",
-  },
-  {
-    title: "Card 6",
-    hover: false,
-    icon: "fas fa-heart",
-    // tooltip: "Tooltip for Card 6",
-  },
-  {
-    title: "Card 7",
-    hover: false,
-    icon: "fas fa-star",
-    // tooltip: "Tooltip for Card 7",
-  },
-  {
-    title: "Card 8",
-    hover: false,
-    icon: "fas fa-user",
-    // tooltip: "Tooltip for Card 8",
-  },
-  {
-    title: "Card 9",
-    hover: false,
-    icon: "fas fa-bell",
-    // tooltip: "Tooltip for Card 9",
-  },
-  {
-    title: "Card 10",
-    hover: false,
-    icon: "fas fa-code",
-    // tooltip: "Tooltip for Card 10",
   },
 ]);
 
@@ -112,12 +80,28 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.cardinformation {
+  position: absolute;
+  top: 45%;
+}
+.cardinformation .card {
+  width: 1000px;
+  transition: none;
+}
+
 .container {
   margin-top: 20px;
   display: flex;
-  flex-wrap: wrap;
+  justify-content: center; /* Memusatkan konten horizontal */
+  align-items: flex-start; /* Memusatkan konten vertikal */
+  height: 100vh;
   gap: 20px;
+  /* Menetapkan tinggi container sesuai tinggi viewport */
 }
+.cardinformation .card:hover {
+  transform: none; /* Menetapkan transformasi ke 'none' */
+}
+
 .card {
   width: 200px;
   height: 100px;
