@@ -103,26 +103,15 @@
         </div>
       </div>
     </div>
-
-    <!-- Modal for time filter -->
-    <div
-      class="modal fade"
-      id="filterModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="filterModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
+    <!-- Modal untuk form filter -->
+    <div class="modal" tabindex="-1" role="dialog" :class="{ show: showModal }">
+      <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="filterModalLabel">
-              Filter Activities by Time
-            </h5>
+            <h5 class="modal-title">Filter Activities</h5>
             <button
               type="button"
               class="close"
-              data-dismiss="modal"
               aria-label="Close"
               @click="hideFilterModal"
             >
@@ -130,27 +119,38 @@
             </button>
           </div>
           <div class="modal-body">
-            <!-- Input to select time range -->
-            <label for="startTime">Start Time:</label>
-            <input
-              type="time"
-              id="startTime"
-              name="startTime"
-              v-model="startTime"
-            />
-            <label for="endTime">End Time:</label>
-            <input type="time" id="endTime" name="endTime" v-model="endTime" />
+            <!-- Form untuk rentang waktu -->
+            <form @submit.prevent="applyFilter">
+              <div class="mb-3">
+                <label for="startTime" class="form-label">Start Time:</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  id="startTime"
+                  v-model="startTime"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="endTime" class="form-label">End Time:</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  id="endTime"
+                  v-model="endTime"
+                />
+              </div>
+            </form>
           </div>
           <div class="modal-footer">
             <button
               type="button"
               class="btn btn-secondary"
-              data-dismiss="modal"
+              @click="hideFilterModal"
             >
               Close
             </button>
             <button type="button" class="btn btn-primary" @click="applyFilter">
-              Apply Filter
+              Apply
             </button>
           </div>
         </div>
@@ -166,9 +166,32 @@ import axios from "axios";
 const robotOptions = ref([]);
 const activities = ref([]);
 const selectedRobot = ref(null);
+
+// State untuk modal
+const showModal = ref(false);
+
+// State untuk rentang waktu
 const startTime = ref("");
 const endTime = ref("");
 
+// Fungsi untuk menampilkan modal
+const showFilterModal = () => {
+  showModal.value = true;
+};
+
+// Fungsi untuk menyembunyikan modal
+const hideFilterModal = () => {
+  showModal.value = false;
+};
+
+// Fungsi untuk menerapkan filter berdasarkan rentang waktu
+const applyFilter = () => {
+  // Lakukan sesuatu dengan rentang waktu yang dipilih, misalnya memanggil fungsi fetchActivities dengan parameter waktu tertentu
+  console.log("Start Time:", startTime.value);
+  console.log("End Time:", endTime.value);
+  // Setelah memproses filter, sembunyikan modal
+  showModal.value = false;
+};
 async function fetchRobots() {
   try {
     const response = await axios.get("http://localhost:5258/robots");
@@ -201,31 +224,15 @@ function selectRobot(robot) {
   fetchActivities(robot);
 }
 
-function formatTime(dateString) {
-  const date = new Date(dateString);
-  return `${date.getHours()}:${date.getMinutes()}`;
-}
-
-function showFilterModal() {
-  $("#filterModal").modal("show");
-}
-
-function hideFilterModal() {
-  $("#filterModal").modal("hide");
-}
-
-function applyFilter() {
-  if (selectedRobot.value) {
-    fetchActivities(selectedRobot.value);
-  }
-  hideFilterModal();
-}
 onMounted(() => {
   fetchRobots();
 });
 </script>
 
 <style scoped>
+.filter {
+  cursor: pointer;
+}
 .activity-description {
   display: flex;
   margin-top: 20px;
@@ -341,5 +348,71 @@ onMounted(() => {
   background-color: white;
   margin-right: 80px;
   margin-top: 2px; /* Memberikan jarak ke kanan */
+}
+
+.modal {
+  display: none; /* Sembunyikan modal secara default */
+  background: rgba(0, 0, 0, 0.5); /* Overlay transparan */
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050; /* Lebih tinggi dari z-index untuk konten */
+  overflow: hidden auto;
+}
+
+/* Style untuk memunculkan modal */
+.modal.show {
+  display: block;
+}
+
+/* Style untuk konten modal */
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.3rem;
+  outline: 0;
+}
+
+/* Style untuk header modal */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  border-top-left-radius: calc(0.3rem - 1px);
+  border-top-right-radius: calc(0.3rem - 1px);
+}
+
+/* Style untuk body modal */
+.modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 1rem;
+  overflow: auto;
+}
+
+/* Style untuk footer modal */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  border-bottom-right-radius: calc(0.3rem - 1px);
+  border-bottom-left-radius: calc(0.3rem - 1px);
+}
+
+/* Style untuk menutup modal */
+.close {
+  padding: 1rem;
+  margin: -1rem -1rem -1rem auto;
+  background: transparent;
+  border: 0;
 }
 </style>

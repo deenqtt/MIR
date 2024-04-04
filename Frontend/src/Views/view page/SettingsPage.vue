@@ -48,7 +48,7 @@ const cards = ref([
     // tooltip: "Tooltip for Lorem",
   },
   {
-    title: "Feature",
+    title: "Mqtt",
     hover: false,
     icon: "fas fa-chart-bar",
     // tooltip: "Tooltip for Lorem",
@@ -88,7 +88,9 @@ onMounted(() => {
   width: 1000px;
   transition: none;
 }
-
+.card {
+  background-color: #f7eedd;
+}
 .container {
   margin-top: 20px;
   display: flex;
@@ -125,7 +127,7 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent background */
+  background-color: #ace2e1; /* Semi-transparent background */
   transition: background-color 0.3s ease;
 }
 .card:hover .card-body {
@@ -145,7 +147,7 @@ onMounted(() => {
 .card-body i {
   opacity: 0;
   transition: opacity 0.3s ease;
-  color: #007bff; /* Adjust the color as needed */
+  color: #008dda; /* Adjust the color as needed */
 }
 .card:hover .card-body p {
   opacity: 0; /* Hide title on hover */

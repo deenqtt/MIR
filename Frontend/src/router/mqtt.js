@@ -1,51 +1,154 @@
-import mqtt from "mqtt";
+import Swal from "sweetalert2";
+import { ref } from "vue";
 
-const brokerUrl = "wss://59.74.91.79"; // URL broker MQTT
+import * as Paho from "paho-mqtt";
 
-// Fungsi untuk menghubungkan ke server MQTT
-const connect = () => {
-  console.log("Connecting to MQTT server...");
-  const client = mqtt.connect(brokerUrl); // Menghubungkan ke broker MQTT
-  // Tangani event ketika koneksi berhasil dibuat
-  client.on("connect", () => {
-    console.log("Connected to MQTT broker");
-  });
+console.log(Paho);
 
-  // Tangani event ketika pesan diterima
-  client.on("message", (topic, message) => {
-    console.log(
-      `Received message on topic: ${topic}, Message: ${message.toString()}`
+let client = null;
+
+export let mqttHost = ref(localStorage.getItem("mqttHost") || "192.168.2.119");
+export let mqttPort = ref(parseInt(localStorage.getItem("mqttPort")) || 9000);
+export let mqttTopic = ref(localStorage.getItem("mqttTopic") || "Batt");
+export let batteryPercentage = ref(0);
+
+function onConnectionLost(responseObject) {
+  if (responseObject.errorCode !== 0) {
+    console.log("onConnectionLost:" + responseObject.errorMessage);
+  }
+}
+
+function onMessageArrived(message) {
+  console.log("Received message:", message.payloadString);
+  console.log("onMessageArrived:" + message.payloadString);
+  try {
+    const payload = JSON.parse(message.payloadString);
+    if (typeof payload === "number") {
+      batteryPercentage.value = payload;
+      updateBatteryIcon(payload);
+    }
+  } catch (error) {
+    console.error("Error parsing MQTT message payload:", error);
+  }
+}
+
+export const mqttConnected = ref(false);
+
+export function connectClient(options) {
+  if (!client || !client.isConnected()) {
+    client = new Paho.Client(
+      mqttHost.value,
+      mqttPort.value,
+      `${new Date().getTime() + Math.round(Math.random() * 1000)}`
     );
-  });
 
-  // Subscribe ke topik tertentu
-  const topic = "test";
-  client.subscribe(topic);
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
 
-  // Publish pesan ke topik tertentu
-  client.publish(topic, "Hello MQTT");
-};
+    client.connect({
+      onSuccess: () => {
+        console.log(
+          "Connected to MQTT on",
+          mqttHost.value,
+          "port",
+          mqttPort.value,
+          "topic",
+          mqttTopic.value
+        );
+        client.subscribe(mqttTopic.value);
+        mqttConnected.value = true;
+        if (options && options.onSuccess) {
+          options.onSuccess();
+        }
+      },
+      onFailure: () => {
+        console.error("Failed to connect to MQTT");
+        if (options && options.onFailure) {
+          options.onFailure();
+        }
+      },
+    });
+  }
+}
 
-// Fungsi untuk mematikan koneksi dari server MQTT
-const disconnect = () => {
-  // Logika untuk memutus koneksi dari server MQTT
-  console.log("Disconnecting from MQTT server...");
-  // Tambahkan logika untuk memutus koneksi dari server MQTT jika diperlukan
-};
+export function updateMqttSettings(host, port, topic) {
+  console.log(
+    "Updating MQTT settings to host",
+    host,
+    "port",
+    port,
+    "topic",
+    topic
+  );
+  mqttHost.value = host;
+  mqttPort.value = port;
+  mqttTopic.value = topic;
 
-// Fungsi untuk melakukan subscribe pada topik MQTT tertentu
-const subscribe = (topic) => {
-  // Logika untuk melakukan subscribe pada topik MQTT
-  console.log("Subscribing to topic:", topic);
-  // Tambahkan logika untuk subscribe ke topik MQTT jika diperlukan
-};
+  // Simpan nilai host, port, dan topic ke localStorage
+  localStorage.setItem("mqttHost", host);
+  localStorage.setItem("mqttPort", port);
+  localStorage.setItem("mqttTopic", topic);
 
-// Fungsi untuk melakukan unsubscribe dari topik MQTT tertentu
-const unsubscribe = (topic) => {
-  // Logika untuk melakukan unsubscribe dari topik MQTT
-  console.log("Unsubscribing from topic:", topic);
-  // Tambahkan logika untuk unsubscribe dari topik MQTT jika diperlukan
-};
-
-// Export fungsi-fungsi yang dibutuhkan
-export { connect, disconnect, subscribe, unsubscribe };
+  // Selanjutnya, sambungkan ulang ke MQTT broker dengan pengaturan yang baru
+  if (client && client.isConnected()) {
+    console.log("Disconnecting from the current host...");
+    client.disconnect();
+    Swal.fire({
+      icon: "info",
+      title: "Updating MQTT settings",
+      text: "Disconnecting from the current host...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    setTimeout(() => {
+      console.log("Connecting to the new host...");
+      connectClient({
+        onSuccess: () => {
+          Swal.fire({
+            icon: "success",
+            title: "MQTT settings updated",
+            text: "Connected to the new host",
+          });
+        },
+        onFailure: () => {
+          Swal.fire({
+            icon: "error",
+            title: "Failed to connect to the new host",
+          });
+        },
+      });
+    }, 2000);
+  } else {
+    Swal.fire({
+      icon: "info",
+      title: "Updating MQTT settings",
+      text: "Connecting to the new host...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    console.log("Connecting to the new host...");
+    connectClient({
+      onSuccess: () => {
+        Swal.fire({
+          icon: "success",
+          title: "MQTT settings updated",
+          text: "Connected to the new host",
+        });
+      },
+      onFailure: () => {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to connect to the new host",
+        });
+      },
+    });
+  }
+}

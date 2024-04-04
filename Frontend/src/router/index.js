@@ -18,8 +18,8 @@ import ErrorLog from "../Views/view page/Errorpage.vue";
 import Error from "../Views/view page/adderror.vue";
 import Battery from "../Views/setting/batterypage.vue";
 import ErrorHand from "../Views/setting/errorhandling.vue";
-import Feature from "../Views/setting/inforobot.vue";
 import Docking from "../Views/setting/docking.vue";
+import MQTT from "../Views/setting/MQTT.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -143,9 +143,9 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: "/feature",
-      name: "feature",
-      component: Feature,
+      path: "/mqtt",
+      name: "mqtt",
+      component: MQTT,
       meta: { requiresAuth: true },
     },
     {

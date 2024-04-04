@@ -13,12 +13,11 @@
               class="form-check-input"
               type="checkbox"
               id="flexSwitchCheckDefault"
-              v-model="isChecked"
-              @change="handleCheckboxChange"
+              v-model="mqttConnected"
+              disabled
             />
-            <label class="form-check-label" for="flexSwitchCheckDefault"
-              >Mqtt</label
-            >
+            <p>MQTT {{ mqttConnectionStatus }}</p>
+            <div id="history-list"></div>
           </div>
 
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -205,24 +204,32 @@
 
 <script setup>
 import axios from "axios";
-import { ref, onMounted, watch, toRefs, computed, reactive } from "vue";
+import { ref, watch, onMounted, toRefs, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { connect, disconnect } from "../router/mqtt.js";
+import { connectClient } from "../router/mqtt";
 
-// Inisialisasi variabel reactive untuk menyimpan status checkbox
-const isChecked = ref(false);
+const mqttConnectionStatus = ref("Disconnected");
+const mqttConnected = ref(false);
 
-// Fungsi untuk menangani perubahan pada checkbox
-const handleCheckboxChange = () => {
-  if (isChecked.value) {
-    // Jika checkbox dicentang, panggil fungsi connect
-    connect();
-  } else {
-    // Jika checkbox tidak dicentang, panggil fungsi disconnect
-    disconnect();
+// Gunakan boolean untuk melacak apakah koneksi sudah terbentuk
+let isMqttConnected = false;
+
+onMounted(() => {
+  // Pastikan hanya terhubung sekali
+  if (!isMqttConnected) {
+    connectClient({
+      onSuccess: () => {
+        mqttConnectionStatus.value = "Connected";
+        mqttConnected.value = true;
+        isMqttConnected = true; // Tandai bahwa koneksi telah terbentuk
+      },
+      onFailure: () => {
+        mqttConnectionStatus.value = "Failed to Connect";
+      },
+    });
   }
-};
+});
 const missionOptions = ref([]);
 const activeSubMenu = ref("");
 const store = useStore();
@@ -421,12 +428,15 @@ onMounted(() => {
 .form-check-input:checked + .form-check-label {
   color: #28a745; /* Warna teks hijau saat tombol dicentang (checked) */
 }
-
+.form-check p {
+  width: 200px;
+}
 .form-check {
   margin-left: 20px;
   margin-top: 20px;
   font-family: "Poppins", sans-serif;
   font-weight: 600;
+  width: 200px;
 }
 .submenu-item .fa-submenu {
   margin-right: -10px;
@@ -557,7 +567,7 @@ input {
 }
 #navbarSupportedContent {
   gap: 60px;
-  margin-left: 300px;
+  margin-left: 100px;
   margin-top: 10px;
 }
 .submenu-item.active-submenu {
