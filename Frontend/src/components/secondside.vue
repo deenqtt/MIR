@@ -13,10 +13,9 @@
               class="form-check-input"
               type="checkbox"
               id="flexSwitchCheckDefault"
-              v-model="mqttConnected"
-              disabled
+            v-model="mqttConnected" disabled
             />
-            <p>MQTT {{ mqttConnectionStatus }}</p>
+        <p>MQTT ({{ mqttStatus }})</p>
             <div id="history-list"></div>
           </div>
 
@@ -207,29 +206,27 @@ import axios from "axios";
 import { ref, watch, onMounted, toRefs, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { connectClient } from "../router/mqtt";
 
-const mqttConnectionStatus = ref("Disconnected");
+// Inisialisasi variabel untuk menyimpan status koneksi MQTT
 const mqttConnected = ref(false);
-
-// Gunakan boolean untuk melacak apakah koneksi sudah terbentuk
-let isMqttConnected = false;
-
-onMounted(() => {
-  // Pastikan hanya terhubung sekali
-  if (!isMqttConnected) {
-    connectClient({
-      onSuccess: () => {
-        mqttConnectionStatus.value = "Connected";
-        mqttConnected.value = true;
-        isMqttConnected = true; // Tandai bahwa koneksi telah terbentuk
-      },
-      onFailure: () => {
-        mqttConnectionStatus.value = "Failed to Connect";
-      },
-    });
+const mqttStatus = ref('Connecting...');
+// Fungsi untuk melakukan permintaan ke API Python
+const checkMQTTConnection = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/check_mqtt_connection'); // Ganti URL dengan URL API Python Anda
+    mqttConnected.value = response.data.connected;
+      mqttStatus.value = response.data.connected ? 'Connected' : 'Disconnected';
+  } catch (error) {
+    console.error('Error checking MQTT connection:', error);
   }
+};
+
+// Ketika komponen dimuat, lakukan permintaan ke API untuk memeriksa koneksi MQTT
+onMounted(() => {
+  checkMQTTConnection();
 });
+
+
 const missionOptions = ref([]);
 const activeSubMenu = ref("");
 const store = useStore();
