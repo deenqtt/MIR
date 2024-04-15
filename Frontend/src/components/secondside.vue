@@ -224,6 +224,7 @@ const checkMQTTConnection = async () => {
 // Ketika komponen dimuat, lakukan permintaan ke API untuk memeriksa koneksi MQTT
 onMounted(() => {
   checkMQTTConnection();
+    setInterval(checkMQTTConnection, 5000);
 });
 
 

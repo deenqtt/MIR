@@ -1,59 +1,37 @@
-<div>
-  <div><pre id="history-list"></pre></div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
+<!-- DynamicPercentage.vue -->
+<template>
+  <div>
+    <h1>Dynamic Percentage:</h1>
+    <h2>{{ percentage }}%</h2>
+  </div>
+</template>
 <script>
-  // import Paho from 'paho-mqtt'
-  const messageHistory = [];
+import { ref, onMounted } from 'vue';
 
-  const renderHistory = () => {
-    document.getElementById("history-list").innerHTML = JSON.stringify(
-      messageHistory,
-      null,
-      2
-    );
-  };
+export default {
+  setup() {
+    const percentage = ref(0);
 
-  // Create a client instance
-  var client = new Paho.Client(
-    "192.168.2.119",
-    Number(9000),
-    `${new Date().getTime() + Math.round(Math.random() * 1000)}`
-  );
+    const fetchPercentage = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/get_percentage');
+        const data = await response.json();
+        percentage.value = data.percentage;
+      } catch (error) {
+        console.error('Error fetching percentage:', error);
+      }
+    };
 
-  // set callback handlers
-  client.onConnectionLost = onConnectionLost;
-  client.onMessageArrived = onMessageArrived;
-
-  // connect the client
-  client.connect({ onSuccess: onConnect });
-  // , userName: undefined, password: undefined
-  // called when the client connects
-  function onConnect() {
-    // Once a connection has been made, make a subscription and send a message.
-    console.log("onConnect");
-    client.subscribe("Containment/Sensor/Temperature_rack_1");
-  }
-
-  // called when the client loses its connection
-  function onConnectionLost(responseObject) {
-    if (responseObject.errorCode !== 0) {
-      console.log("onConnectionLost:" + responseObject.errorMessage);
-    }
-  }
-
-  // called when a message arrives
-  function onMessageArrived(message) {
-    console.log("onMessageArrived:" + message.payloadString);
-
-    messageHistory.push({
-      time: new Date().toISOString(),
-      message: message.payloadString,
+    // Panggil fetchPercentage setiap 5 detik
+    onMounted(() => {
+      fetchPercentage();
+      setInterval(fetchPercentage, 5000); // Polling setiap 5 detik
     });
 
-    renderHistory();
+    return {
+      percentage
+    };
   }
-
-  renderHistory();
+};
 </script>
+

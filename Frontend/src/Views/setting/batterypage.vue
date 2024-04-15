@@ -24,9 +24,7 @@
           </a>
         </div>
       </div>
-      <button v-if="selectedRobot" @click="goBack" class="btn btn-primary">
-        Back
-      </button>
+     
     </div>
 
     <div v-if="!selectedRobot">
@@ -39,26 +37,14 @@
       <button @click="goBack" class="btn btn-primary">Back</button>
     </div>
     <!-- Container untuk menampilkan informasi baterai -->
-    <div v-if="selectedRobot" class="battery-info">
-      <div class="card bg-light">
-        <h3 class="card-header">Battery Information for Robot</h3>
+    <div v-if="selectedRobot">
+      <div class="d-flex d1 ">
+      <div class="card">
         <div class="card-body">
-          <div class="battery-container">
-            <!-- Kode ikon baterai disini -->
-            <div class="battery-icon">
-              <span class="material-icons">{{ batteryIcon }}</span>
-            </div>
-            <div class="battery-percentage">{{ batteryPercentage }}%</div>
-          </div>
-
-          <!-- Tambahkan informasi baterai yang relevan di sini -->
-
-          <!-- Tampilkan presentase baterai -->
-        </div>
-      </div>
+      <h1 class="txt">Dynamic Percentage:</h1>
+      <h2 class="txt">{{ percentage }}%</h2></div>
     </div>
-    <div v-if="selectedRobot" class="card bg-light card1">
-      <div class="card-body"></div>
+  </div>
     </div>
   </div>
 </template>
@@ -69,11 +55,9 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { batteryPercentage } from "../../router/mqtt"; // Import fungsi dan variabel dari mqtt.js
 const robotOptions = ref([]);
-const selectedRobot = ref(null); // Menyimpan nama robot yang dipilih
 const router = useRouter();
-// Variabel untuk menyimpan ikon baterai
-const batteryIcon = ref("battery_full");
-
+const selectedRobot = ref(null);
+const percentage = ref(0);
 async function fetchRobots() {
   try {
     const response = await axios.get("http://localhost:5258/robots");
@@ -88,34 +72,34 @@ const selectRobot = (robot) => {
 const goBack = () => {
   router.go(-1); // Kembali ke halaman sebelumnya
 };
-// Fungsi untuk mengupdate ikon baterai berdasarkan presentase
-function updateBatteryIcon(percentage) {
-  if (percentage > 80) {
-    batteryIcon.value = "battery_full";
-  } else if (percentage > 60) {
-    batteryIcon.value = "battery_80";
-  } else if (percentage > 40) {
-    batteryIcon.value = "battery_60";
-  } else if (percentage > 20) {
-    batteryIcon.value = "battery_20";
-  } else {
-    batteryIcon.value = "battery_alert";
+
+const fetchPercentage = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/get_percentage');
+    const data = await response.json();
+    percentage.value = data.percentage;
+  } catch (error) {
+    console.error('Error fetching percentage:', error);
   }
-}
-// Panggil fungsi setiap kali presentase baterai berubah
+};
 onMounted(() => {
-  updateBatteryIcon(batteryPercentage.value);
-});
-// Panggil fungsi setiap kali presentase baterai berubah
-watch(batteryPercentage, (newValue) => {
-  updateBatteryIcon(newValue);
-});
-onMounted(() => {
+  fetchPercentage();
+  setInterval(fetchPercentage, 5000); // Polling setiap 5 detik
   fetchRobots();
 });
 </script>
 
 <style scoped>
+.txt{
+  font-size: 1rem;
+}
+
+.d1 .card{
+  width: 100%; 
+  border-radius: 7px;
+  align-items: center;
+  justify-content: center;
+}
 .d-flex {
   display: flex;
   justify-content: space-between;
