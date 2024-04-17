@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket MQTT Connection</title>
+</head>
+<body>
+  <h1>Status Koneksi:</h1>
+  <p id="status">Menunggu koneksi...</p>
+  <input type="checkbox" id="mqttCheckbox" disabled>
+  <label for="mqttCheckbox">MQTT Connected</label>
+
+  <script>
+    const socket = new WebSocket('ws://localhost:8080');
+  
+    socket.onopen = function() {
+      console.log('Terhubung ke server WebSocket');
+      document.getElementById('status').innerText = 'Terhubung ke server WebSocket';
+    };
+  
+    socket.onmessage = function(event) {
+      console.log('Menerima pesan:', event.data);
+      if (event.data === 'connected') {
+        document.getElementById('mqttCheckbox').checked = true;
+        document.getElementById('status').innerText = 'Terhubung ke broker MQTT';
+      }
+    };
+  
+    socket.onerror = function(error) {
+      console.error('Terjadi kesalahan:', error.message);
+      document.getElementById('status').innerText = 'Terjadi kesalahan: ' + error.message;
+    };
+  
+    socket.onclose = function() {
+      console.log('Koneksi ditutup');
+      document.getElementById('status').innerText = 'Koneksi ditutup';
+      document.getElementById('mqttCheckbox').checked = false;
+    };
+  </script>
+</body>
+</html>

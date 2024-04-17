@@ -1,5 +1,7 @@
 <template>
   <div class="container">
+    <div class="bag1">
+    <!-- Existing cards -->
     <router-link
       v-for="card in cards"
       :to="`/${card.title}`"
@@ -18,15 +20,21 @@
         <i v-if="card.hover" :class="card.icon"></i>
       </div>
     </router-link>
-
-    <div class="cardinformation">
-      <div class="card bg-light"></div>
+</div>
+    <!-- New card for robot information -->
+    <div class="card robot-card">
+      <div class="card-body">
+        <p class="card-title">Informasi Robot</p>
+        <i class="fas fa-robot"></i>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faRobot } from '@fortawesome/free-solid-svg-icons'
 
 const cards = ref([
   {
@@ -77,31 +85,22 @@ onMounted(() => {
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });
 });
+
+const faRobotIcon = faRobot;
 </script>
 
 <style scoped>
-.cardinformation {
-  position: absolute;
-  top: 45%;
-}
-.cardinformation .card {
-  width: 1000px;
-  transition: none;
-}
+/* Existing styles */
+
 .card {
   background-color: #f7eedd;
 }
-.container {
+.bag1 {
   margin-top: 20px;
   display: flex;
-  justify-content: center; /* Memusatkan konten horizontal */
-  align-items: flex-start; /* Memusatkan konten vertikal */
-  height: 100vh;
+  justify-content: center;
+  align-items: flex-start;
   gap: 20px;
-  /* Menetapkan tinggi container sesuai tinggi viewport */
-}
-.cardinformation .card:hover {
-  transform: none; /* Menetapkan transformasi ke 'none' */
 }
 
 .card {
@@ -115,7 +114,7 @@ onMounted(() => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .card:hover {
-  transform: scale(1.05); /* Scale up on hover */
+  transform: scale(1.05);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 .card-body {
@@ -127,37 +126,83 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #ace2e1; /* Semi-transparent background */
+  background-color: #ace2e1;
   transition: background-color 0.3s ease;
 }
 .card:hover .card-body {
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0
-  ); /* Transparent background on hover */
+  background-color: rgba(255, 255, 255, 0);
 }
 .card-body p {
   margin: 0;
   transition: opacity 0.3s ease;
   font-family: "Poppins", sans-serif;
-  color: #333; /* Adjust the color as needed */
+  color: #333;
 }
 .card-body i {
   opacity: 0;
   transition: opacity 0.3s ease;
-  color: #008dda; /* Adjust the color as needed */
+  color: #008dda;
 }
 .card:hover .card-body p {
-  opacity: 0; /* Hide title on hover */
+  opacity: 0;
 }
 .card:hover .card-body i {
+  opacity: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(2);
+  font-size: 24px;
+}
+
+/* New styles for robot card */
+.robot-card {
+  display: flex;
+  margin-top: 50px;
+ width: auto; /* Card width */
+  height: 100px; /* Card height */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Card shadow */
+  border-radius: 8px; /* Card border radius */
+  cursor: pointer; /* Cursor style */
+  overflow: hidden; /* Overflow */
+ 
+}
+
+.robot-card .card-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  top: 7;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffd1dc; /* Semi-transparent background */
+  transition: background-color 0.3s ease; /* Transition effect */
+}
+.robot-card:hover .card-body {
+  background-color: rgba(255, 255, 255, 0); /* Transparent background on hover */
+}
+.robot-card .card-body p {
+  margin: 0;
+  transition: opacity 0.3s ease; /* Transition effect */
+  font-family: "Poppins", sans-serif; /* Font family */
+  color: #333; /* Text color */
+}
+.robot-card .card-body i {
+  opacity: 0;
+  transition: opacity 0.3s ease; /* Transition effect */
+  color: #f00; /* Icon color */
+}
+.robot-card:hover .card-body p {
+  opacity: 0; /* Hide title on hover */
+}
+.robot-card:hover .card-body i {
   opacity: 1; /* Show icon on hover */
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(2); /* Scale up icon on hover */
-  font-size: 24px;
+  font-size: 24px; /* Icon size */
 }
 </style>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Data Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.2.7/mqtt.min.js"></script>
+</head>
+<body>
+    <h1>MQTT Data Viewer</h1>
+    <div id="mqttData"></div>
+    <script>
+        const client = mqtt.connect('ws://52.74.91.79:1883');
+
+        client.on('connect', function () {
+            console.log('Connected to MQTT broker');
+            client.subscribe('topic_name');
+        });
+
+        client.on('message', function (topic, message) {
+            console.log('Received message:', message.toString());
+            document.getElementById('mqttData').innerText = 'MQTT Data: ' + message.toString();
+        });
+    </script>
+</body>
+</html>

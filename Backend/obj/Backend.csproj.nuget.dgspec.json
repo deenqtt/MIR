@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "/home/deden_h/MIR/Backend/Backend.csproj": {}
+    "C:\\Users\\deden\\OneDrive\\Documents\\MIR\\Backend\\Backend.csproj": {}
   },
   "projects": {
-    "/home/deden_h/MIR/Backend/Backend.csproj": {
+    "C:\\Users\\deden\\OneDrive\\Documents\\MIR\\Backend\\Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/deden_h/MIR/Backend/Backend.csproj",
+        "projectUniqueName": "C:\\Users\\deden\\OneDrive\\Documents\\MIR\\Backend\\Backend.csproj",
         "projectName": "Backend",
-        "projectPath": "/home/deden_h/MIR/Backend/Backend.csproj",
-        "packagesPath": "/home/deden_h/.nuget/packages/",
-        "outputPath": "/home/deden_h/MIR/Backend/obj/",
+        "projectPath": "C:\\Users\\deden\\OneDrive\\Documents\\MIR\\Backend\\Backend.csproj",
+        "packagesPath": "C:\\Users\\deden\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\deden\\OneDrive\\Documents\\MIR\\Backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/deden_h/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\deden\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -109,7 +111,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/241/sdk/8.0.204/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

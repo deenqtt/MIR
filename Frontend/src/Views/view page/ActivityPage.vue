@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="d-flex">
+    <div class="d-">
       <h5 class="h5span"><span>Activities</span></h5>
       <div class="dropdown show">
         <a
@@ -230,6 +230,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.d-{
+  display: flex;
+}
+
 .filter {
   cursor: pointer;
 }
@@ -241,6 +245,11 @@ onMounted(() => {
 .dropdown {
   margin-top: 23px;
   margin-left: 20px;
+  
+
+}
+.dropdown-toggle{
+  color: #0c0c0c;
 }
 .h5span {
   font-size: 25px;

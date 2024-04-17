@@ -9,7 +9,7 @@
     </div>
     <div v-else>
       <h5>Error <span>Log</span></h5>
-      <p class="p">Monitoring Your Error Logs...</p>
+      <p class="p">Monitoring Error Robot</p>
       <br />
       <div class="error">
         <label for="robotDropdown">Error List</label>
@@ -61,14 +61,14 @@
               <tr>
                 <th>Robot Name</th>
                 <th>Error Description</th>
-                <th>Action</th>
+                <th class="text-end">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(error, index) in filteredErrors" :key="index">
                 <td>{{ error.robotname }}</td>
                 <td>{{ error.explained }}</td>
-                <td class="justify-content-end">
+                <td class="justify-content-end text-end">
                   <button @click="markAsDone(index)" class="btn btn-success">
                     Done
                   </button>
@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onBeforeMount } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -156,7 +156,7 @@ const filteredErrors = computed(() => {
   );
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   fetchErrors();
   fetchRobots();
 });
@@ -247,6 +247,11 @@ span {
 .table {
   margin-top: 20px;
 }
+.table {
+  margin-top: 20px;
+  background-color: rgba(255, 255, 255, 0.5); /* Ubah nilai opasitas di sini (0.5 adalah 50%) */
+}
+
 .btn-success {
   background-color: #28a745;
   color: white;
