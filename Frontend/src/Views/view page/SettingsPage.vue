@@ -24,8 +24,8 @@
     <!-- New card for robot information -->
     <div class="card robot-card">
       <div class="card-body">
-        <p class="card-title">Informasi Robot</p>
-        <i class="fas fa-robot"></i>
+      
+      
       </div>
     </div>
   </div>
@@ -92,7 +92,7 @@ const faRobotIcon = faRobot;
 <style scoped>
 /* Existing styles */
 
-.card {
+.bag1 .card {
   background-color: #f7eedd;
 }
 .bag1 {
@@ -103,7 +103,7 @@ const faRobotIcon = faRobot;
   gap: 20px;
 }
 
-.card {
+.bag1 .card {
   width: 200px;
   height: 100px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -113,11 +113,11 @@ const faRobotIcon = faRobot;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.card:hover {
+.bag1 .card:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
-.card-body {
+.bag1 .card-body {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,24 +129,24 @@ const faRobotIcon = faRobot;
   background-color: #ace2e1;
   transition: background-color 0.3s ease;
 }
-.card:hover .card-body {
+.bag1 .card:hover .card-body {
   background-color: rgba(255, 255, 255, 0);
 }
-.card-body p {
+.bag1 .card-body p {
   margin: 0;
   transition: opacity 0.3s ease;
   font-family: "Poppins", sans-serif;
   color: #333;
 }
-.card-body i {
+.bag1 .card-body i {
   opacity: 0;
   transition: opacity 0.3s ease;
   color: #008dda;
 }
-.card:hover .card-body p {
+.bag1 .card:hover .card-body p {
   opacity: 0;
 }
-.card:hover .card-body i {
+.bag1 .card:hover .card-body i {
   opacity: 1;
   position: absolute;
   top: 50%;
@@ -159,50 +159,20 @@ const faRobotIcon = faRobot;
 .robot-card {
   display: flex;
   margin-top: 50px;
- width: auto; /* Card width */
-  height: 100px; /* Card height */
+  width: auto; /* Card width */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Card shadow */
   border-radius: 8px; /* Card border radius */
   cursor: pointer; /* Cursor style */
-  overflow: hidden; /* Overflow */
- 
 }
 
-.robot-card .card-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  display: flex;
-  top: 7;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #ffd1dc; /* Semi-transparent background */
-  transition: background-color 0.3s ease; /* Transition effect */
+.robot-card .card:hover{
+  height: 200px;
 }
-.robot-card:hover .card-body {
-  background-color: rgba(255, 255, 255, 0); /* Transparent background on hover */
-}
-.robot-card .card-body p {
-  margin: 0;
-  transition: opacity 0.3s ease; /* Transition effect */
-  font-family: "Poppins", sans-serif; /* Font family */
-  color: #333; /* Text color */
-}
-.robot-card .card-body i {
-  opacity: 0;
-  transition: opacity 0.3s ease; /* Transition effect */
-  color: #f00; /* Icon color */
-}
-.robot-card:hover .card-body p {
-  opacity: 0; /* Hide title on hover */
-}
-.robot-card:hover .card-body i {
-  opacity: 1; /* Show icon on hover */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(2); /* Scale up icon on hover */
-  font-size: 24px; /* Icon size */
-}
+
+
+
+
+
+
+
 </style>
